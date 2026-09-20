@@ -1,0 +1,42 @@
+<section class="dashboard">
+
+  <div class="page-header">
+    <div>
+      <h2>Dashboard</h2>
+      <p>Vue d’ensemble de l’activité de StockFlow.</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+
+    @for (stat of stats; track stat.label) {
+
+      <p-card>
+        <div class="stat-card">
+
+          <div class="stat-icon">
+            <i [class]="stat.icon"></i>
+          </div>
+
+          <div class="stat-content">
+            <span class="stat-label">
+              {{ stat.label }}
+            </span>
+
+            <strong class="stat-value">
+              {{ stat.value }}
+            </strong>
+
+            <span class="stat-detail">
+              {{ stat.detail }}
+            </span>
+          </div>
+
+        </div>
+      </p-card>
+
+    }
+
+  </div>
+
+</section>
