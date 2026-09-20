@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using StockFlow.Api.Data;
 using StockFlow.Api.Models;
 
 namespace StockFlow.Api.Controllers;
@@ -7,48 +9,29 @@ namespace StockFlow.Api.Controllers;
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
 {
-    private static readonly List<Client> Clients =
-    [
-        new Client
-        {
-            Id = 1,
-            Name = "Martin Dupont",
-            Email = "martin.dupont@email.fr",
-            Phone = "06 12 34 56 78",
-            City = "Marseille"
-        },
-        new Client
-        {
-            Id = 2,
-            Name = "Sophie Bernard",
-            Email = "sophie.bernard@email.fr",
-            Phone = "06 98 76 54 32",
-            City = "Aix-en-Provence"
-        },
-        new Client
-        {
-            Id = 3,
-            Name = "Lucas Morel",
-            Email = "lucas.morel@email.fr",
-            Phone = "06 44 28 17 90",
-            City = "Toulon"
-        }
-    ];
+    private readonly AppDbContext _context;
+
+    public ClientsController(AppDbContext context)
+    {
+        _context = context;
+    }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Client>> GetClients()
+    public async Task<ActionResult<IEnumerable<Client>>> GetClients()
     {
-        return Ok(Clients);
+        var clients = await _context.Clients
+            .AsNoTracking()
+            .ToListAsync();
+
+        return Ok(clients);
     }
 
     [HttpPost]
-    public ActionResult<Client> CreateClient(Client client)
+    public async Task<ActionResult<Client>> CreateClient(Client client)
     {
-        client.Id = Clients.Count == 0
-            ? 1
-            : Clients.Max(existingClient => existingClient.Id) + 1;
+        _context.Clients.Add(client);
 
-        Clients.Add(client);
+        await _context.SaveChangesAsync();
 
         return Created(
             $"/api/clients/{client.Id}",
