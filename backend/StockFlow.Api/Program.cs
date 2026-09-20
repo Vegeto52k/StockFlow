@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockFlow.Api.Data;
+using StockFlow.Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     );
 });
+
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddCors(options =>
 {

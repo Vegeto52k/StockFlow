@@ -1,0 +1,16 @@
+# Backend .NET
+backend/**/bin/
+backend/**/obj/
+
+# SQLite local database
+backend/**/*.db
+backend/**/*.db-shm
+backend/**/*.db-wal
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using StockFlow.Api.Data;
 using StockFlow.Api.Models;
+using StockFlow.Api.Repositories;
 
 namespace StockFlow.Api.Controllers;
 
@@ -9,32 +8,44 @@ namespace StockFlow.Api.Controllers;
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ClientsController(AppDbContext context)
+    public ClientsController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Client>>> GetClients()
     {
-        var clients = await _context.Clients
-            .AsNoTracking()
-            .ToListAsync();
+        var clients = await _unitOfWork.Clients.GetAllAsync();
 
         return Ok(clients);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<Client>> GetClientById(int id)
+    {
+        var client = await _unitOfWork.Clients.GetByIdAsync(id);
+
+        if (client is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(client);
     }
 
     [HttpPost]
     public async Task<ActionResult<Client>> CreateClient(Client client)
     {
-        _context.Clients.Add(client);
+        await _unitOfWork.Clients.AddAsync(client);
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
-        return Created(
-            $"/api/clients/{client.Id}",
+        return CreatedAtAction(
+            nameof(GetClientById),
+            new { id = client.Id },
             client
         );
     }
