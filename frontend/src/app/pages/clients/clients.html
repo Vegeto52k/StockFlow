@@ -1,1 +1,110 @@
-<p>clients works!</p>
+<section class="clients-page">
+
+    <div class="page-header">
+        <div>
+            <h2>Clients</h2>
+            <p>Gestion des clients de StockFlow.</p>
+        </div>
+
+        <button pButton type="button" (click)="openCreateClientDialog()">
+            <i class="pi pi-plus"></i>
+            <span>Nouveau client</span>
+        </button>
+    </div>
+
+    <p-table [value]="clients" [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 20]">
+        <ng-template #header>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Ville</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-client>
+            <tr>
+                <td>{{ client.id }}</td>
+                <td>{{ client.name }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.city }}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+</section>
+
+<p-dialog header="Nouveau client" [(visible)]="clientDialogVisible" [modal]="true" [style]="{ width: '500px' }">
+
+    <form [formGroup]="clientForm" (ngSubmit)="createClient()">
+
+        <div class="form-field">
+            <label for="name">Nom</label>
+
+            <input id="name" type="text" pInputText formControlName="name" />
+
+            @if (clientForm.controls.name.touched && clientForm.controls.name.invalid) {
+            <small class="form-error">
+                Le nom est obligatoire.
+            </small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label for="email">Email</label>
+
+            <input id="email" type="email" pInputText formControlName="email" />
+
+            @if (clientForm.controls.email.touched && clientForm.controls.email.errors?.['required']) {
+            <small class="form-error">
+                L'email est obligatoire.
+            </small>
+            }
+
+            @if (clientForm.controls.email.touched && clientForm.controls.email.errors?.['email']) {
+            <small class="form-error">
+                L'adresse email n'est pas valide.
+            </small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label for="phone">Téléphone</label>
+
+            <input id="phone" type="text" pInputText formControlName="phone" />
+
+            @if (clientForm.controls.phone.touched && clientForm.controls.phone.invalid) {
+            <small class="form-error">
+                Le téléphone est obligatoire.
+            </small>
+            }
+        </div>
+
+        <div class="form-field">
+            <label for="city">Ville</label>
+
+            <input id="city" type="text" pInputText formControlName="city" />
+
+            @if (clientForm.controls.city.touched && clientForm.controls.city.invalid) {
+            <small class="form-error">
+                La ville est obligatoire.
+            </small>
+            }
+        </div>
+
+        <div class="form-actions">
+            <button pButton type="button" severity="secondary" (click)="clientDialogVisible = false">
+                <span>Annuler</span>
+            </button>
+
+            <button pButton type="submit">
+                <i class="pi pi-check"></i>
+                <span>Créer</span>
+            </button>
+        </div>
+
+    </form>
+
+</p-dialog>
