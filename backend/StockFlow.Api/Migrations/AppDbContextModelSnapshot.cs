@@ -42,6 +42,38 @@ namespace StockFlow.Api.Migrations
 
                     b.ToTable("Clients");
                 });
+
+            modelBuilder.Entity("StockFlow.Api.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MinimumStock")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
+                });
 #pragma warning restore 612, 618
         }
     }

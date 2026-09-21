@@ -1,0 +1,80 @@
+.products-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #6b7280;
+  }
+}
+
+.stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 6px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.available-stock {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.low-stock {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-weight: 600;
+  }
+
+  input {
+    width: 100%;
+  }
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}

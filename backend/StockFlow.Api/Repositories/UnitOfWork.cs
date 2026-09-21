@@ -8,13 +8,18 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(
         AppDbContext context,
-        IClientRepository clientRepository)
+        IClientRepository clientRepository,
+        IProductRepository productRepository)
     {
         _context = context;
+
         Clients = clientRepository;
+        Products = productRepository;
     }
 
     public IClientRepository Clients { get; }
+
+    public IProductRepository Products { get; }
 
     public async Task<int> SaveChangesAsync()
     {
