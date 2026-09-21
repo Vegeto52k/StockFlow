@@ -49,4 +49,45 @@ public class ClientsController : ControllerBase
             client
         );
     }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<Client>> UpdateClient(
+        int id,
+        Client updatedClient)
+    {
+        var existingClient = await _unitOfWork.Clients.GetByIdAsync(id);
+
+        if (existingClient is null)
+        {
+            return NotFound();
+        }
+
+        existingClient.Name = updatedClient.Name;
+        existingClient.Email = updatedClient.Email;
+        existingClient.Phone = updatedClient.Phone;
+        existingClient.City = updatedClient.City;
+
+        _unitOfWork.Clients.Update(existingClient);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return Ok(existingClient);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteClient(int id)
+    {
+        var client = await _unitOfWork.Clients.GetByIdAsync(id);
+
+        if (client is null)
+        {
+            return NotFound();
+        }
+
+        _unitOfWork.Clients.Delete(client);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

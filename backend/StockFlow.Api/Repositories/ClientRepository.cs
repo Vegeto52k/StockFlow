@@ -31,4 +31,14 @@ public class ClientRepository : IClientRepository
     {
         await _context.Clients.AddAsync(client);
     }
+
+    public void Update(Client client)
+    {
+        _context.Clients.Update(client);
+    }
+
+    public void Delete(Client client)
+    {
+        _context.Clients.Remove(client);
+    }
 }
