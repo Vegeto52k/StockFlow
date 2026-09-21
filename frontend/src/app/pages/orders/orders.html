@@ -1,1 +1,277 @@
-<p>orders works!</p>
+<p-toast />
+
+<section class="orders-page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Commandes</h2>
+
+      <p>
+        Gestion des commandes clients de StockFlow.
+      </p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      (click)="openCreateOrderDialog()"
+    >
+      <i class="pi pi-plus"></i>
+      <span>Nouvelle commande</span>
+    </button>
+
+  </div>
+
+  <p-table
+    [value]="orders()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+  >
+
+    <ng-template #header>
+      <tr>
+        <th>N°</th>
+        <th>Date</th>
+        <th>Client</th>
+        <th>Produits</th>
+        <th>Total</th>
+        <th>Statut</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-order>
+      <tr>
+
+        <td>
+          #{{ order.id }}
+        </td>
+
+        <td>
+          {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </td>
+
+        <td>
+          {{ order.client?.name ?? 'Client inconnu' }}
+        </td>
+
+        <td>
+          {{ order.items.length }}
+        </td>
+
+        <td>
+          {{ calculateOrderTotal(order) | number:'1.2-2' }} €
+        </td>
+
+        <td>
+          {{ order.status }}
+        </td>
+
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td
+          colspan="6"
+          class="empty-message"
+        >
+          Aucune commande enregistrée.
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</section>
+
+
+<p-dialog
+  header="Nouvelle commande"
+  [(visible)]="orderDialogVisible"
+  [modal]="true"
+  [style]="{ width: '850px' }"
+>
+
+  <form
+    [formGroup]="orderForm"
+    (ngSubmit)="saveOrder()"
+  >
+
+    <div class="form-field">
+
+      <label for="client">
+        Client
+      </label>
+
+      <p-select
+        inputId="client"
+        formControlName="clientId"
+        [options]="clients()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner un client"
+        [filter]="true"
+        filterBy="name"
+      />
+
+      @if (
+        orderForm.controls.clientId.touched &&
+        orderForm.controls.clientId.invalid
+      ) {
+        <small class="form-error">
+          Le client est obligatoire.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="order-items-header">
+
+      <h3>Produits</h3>
+
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        (click)="addOrderItem()"
+      >
+        <i class="pi pi-plus"></i>
+        <span>Ajouter un produit</span>
+      </button>
+
+    </div>
+
+
+    <div
+      formArrayName="items"
+      class="order-items"
+    >
+
+      @for (
+        itemGroup of orderItems.controls;
+        track $index;
+        let index = $index
+      ) {
+
+        <div
+          [formGroupName]="index"
+          class="order-item"
+        >
+
+          <div class="form-field product-field">
+
+            <label>
+              Produit
+            </label>
+
+            <p-select
+              formControlName="productId"
+              [options]="products()"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Sélectionner un produit"
+              [filter]="true"
+              filterBy="name"
+            />
+
+            @if (
+              itemGroup.controls.productId.touched &&
+              itemGroup.controls.productId.invalid
+            ) {
+              <small class="form-error">
+                Sélectionnez un produit.
+              </small>
+            }
+
+          </div>
+
+
+          <div class="form-field quantity-field">
+
+            <label>
+              Quantité
+            </label>
+
+            <p-inputnumber
+              formControlName="quantity"
+              [min]="1"
+              [showButtons]="true"
+            />
+
+          </div>
+
+
+          <div class="line-total">
+
+            <span>Total ligne</span>
+
+            <strong>
+              {{
+                calculateItemTotal(
+                  itemGroup.controls.productId.value,
+                  itemGroup.controls.quantity.value
+                )
+                | number:'1.2-2'
+              }} €
+            </strong>
+
+          </div>
+
+
+          <button
+            pButton
+            type="button"
+            severity="danger"
+            (click)="removeOrderItem(index)"
+            [disabled]="orderItems.length === 1"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+
+    <div class="order-total">
+
+      <span>
+        Total de la commande
+      </span>
+
+      <strong>
+        {{ calculateDraftTotal() | number:'1.2-2' }} €
+      </strong>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        (click)="closeOrderDialog()"
+      >
+        Annuler
+      </button>
+
+      <button
+        pButton
+        type="submit"
+      >
+        <i class="pi pi-check"></i>
+        <span>Créer la commande</span>
+      </button>
+
+    </div>
+
+  </form>
+
+</p-dialog>

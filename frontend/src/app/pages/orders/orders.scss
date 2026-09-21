@@ -1,0 +1,163 @@
+.orders-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #6b7280;
+  }
+}
+
+.empty-message {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    font-weight: 600;
+  }
+
+  p-select,
+  p-inputnumber {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.order-items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.order-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 2fr)
+    minmax(0, 1fr)
+    130px
+    48px;
+
+  gap: 16px;
+  align-items: end;
+
+  padding: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+.product-field,
+.quantity-field {
+  min-width: 0;
+}
+
+.line-total {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+
+  min-width: 130px;
+  padding-bottom: 7px;
+
+  span {
+    color: #6b7280;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  strong {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+}
+
+/*
+ * PrimeNG génère des éléments internes dans p-inputnumber.
+ * On les force à respecter la largeur de la colonne CSS Grid.
+ */
+:host ::ng-deep .quantity-field .p-inputnumber {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .quantity-field .p-inputnumber-input {
+  width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .quantity-field .p-inputnumber-button {
+  flex: 0 0 auto;
+}
+
+.order-total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #e5e7eb;
+
+  span {
+    font-size: 1rem;
+  }
+
+  strong {
+    font-size: 1.4rem;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
