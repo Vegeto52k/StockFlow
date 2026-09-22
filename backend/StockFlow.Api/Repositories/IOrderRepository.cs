@@ -8,5 +8,7 @@ public interface IOrderRepository
 
     Task<Order?> GetByIdAsync(int id);
 
+    Task<Order?> GetByIdForUpdateAsync(int id);
+
     Task AddAsync(Order order);
 }

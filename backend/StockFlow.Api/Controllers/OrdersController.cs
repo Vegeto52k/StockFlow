@@ -137,12 +137,81 @@ public class OrdersController : ControllerBase
             return StatusCode(500);
         }
 
-        var response = MapOrderToResponse(createdOrder);
-
         return CreatedAtAction(
             nameof(GetOrderById),
             new { id = order.Id },
-            response
+            MapOrderToResponse(createdOrder)
+        );
+    }
+
+    [HttpPatch("{id:int}/status")]
+    public async Task<ActionResult<OrderResponse>> UpdateOrderStatus(
+        int id,
+        UpdateOrderStatusRequest request)
+    {
+        var order =
+            await _unitOfWork.Orders.GetByIdForUpdateAsync(id);
+
+        if (order is null)
+        {
+            return NotFound();
+        }
+
+        if (order.Status != "Pending")
+        {
+            return BadRequest(
+                "Seule une commande en attente peut changer de statut."
+            );
+        }
+
+        var requestedStatus = request.Status
+            .Trim()
+            .ToLowerInvariant();
+
+        if (
+            requestedStatus != "validated" &&
+            requestedStatus != "cancelled"
+        )
+        {
+            return BadRequest(
+                "Le statut doit être Validated ou Cancelled."
+            );
+        }
+
+        if (requestedStatus == "cancelled")
+        {
+            foreach (var item in order.Items)
+            {
+                if (item.Product is null)
+                {
+                    return StatusCode(
+                        500,
+                        "Impossible de restaurer le stock d'un produit."
+                    );
+                }
+
+                item.Product.StockQuantity += item.Quantity;
+            }
+
+            order.Status = "Cancelled";
+        }
+        else
+        {
+            order.Status = "Validated";
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var updatedOrder =
+            await _unitOfWork.Orders.GetByIdAsync(id);
+
+        if (updatedOrder is null)
+        {
+            return StatusCode(500);
+        }
+
+        return Ok(
+            MapOrderToResponse(updatedOrder)
         );
     }
 

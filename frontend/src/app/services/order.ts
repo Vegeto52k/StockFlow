@@ -34,4 +34,16 @@ export class OrderService {
       request
     );
   }
+
+  updateOrderStatus(
+    id: number,
+    status: 'Validated' | 'Cancelled'
+  ): Observable<Order> {
+    return this.http.patch<Order>(
+      `${this.apiUrl}/${id}/status`,
+      {
+        status
+      }
+    );
+  }
 }

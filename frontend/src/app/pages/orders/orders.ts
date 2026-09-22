@@ -62,7 +62,10 @@ export class Orders implements OnInit {
   clients = signal<Client[]>([]);
   products = signal<Product[]>([]);
 
+  selectedOrder = signal<Order | null>(null);
+
   orderDialogVisible = false;
+  orderDetailsVisible = false;
 
   orderForm = new FormGroup({
     clientId: new FormControl<number | null>(
@@ -162,6 +165,16 @@ export class Orders implements OnInit {
     this.orderDialogVisible = true;
   }
 
+  openOrderDetails(order: Order): void {
+    this.selectedOrder.set(order);
+    this.orderDetailsVisible = true;
+  }
+
+  closeOrderDetails(): void {
+    this.orderDetailsVisible = false;
+    this.selectedOrder.set(null);
+  }
+
   addOrderItem(): void {
     this.orderItems.push(
       this.createOrderItemForm()
@@ -254,8 +267,6 @@ export class Orders implements OnInit {
 
         this.orderDialogVisible = false;
 
-        // Les stocks ont été diminués côté backend.
-        // On recharge donc les produits.
         this.loadProducts();
 
         this.messageService.add({
@@ -278,6 +289,56 @@ export class Orders implements OnInit {
         });
       }
     });
+  }
+
+  updateOrderStatus(
+    order: Order,
+    status: 'Validated' | 'Cancelled'
+  ): void {
+    this.orderService
+      .updateOrderStatus(order.id, status)
+      .subscribe({
+        next: (updatedOrder) => {
+          this.orders.update(orders =>
+            orders.map(currentOrder =>
+              currentOrder.id === updatedOrder.id
+                ? updatedOrder
+                : currentOrder
+            )
+          );
+
+          this.selectedOrder.set(updatedOrder);
+
+          if (status === 'Cancelled') {
+            this.loadProducts();
+          }
+
+          this.messageService.add({
+            severity: 'success',
+            summary:
+              status === 'Validated'
+                ? 'Commande validée'
+                : 'Commande annulée',
+            detail:
+              status === 'Validated'
+                ? `La commande #${updatedOrder.id} a été validée.`
+                : `La commande #${updatedOrder.id} a été annulée et le stock a été restauré.`
+          });
+        },
+
+        error: (error) => {
+          const detail =
+            typeof error.error === 'string'
+              ? error.error
+              : 'Impossible de modifier le statut de la commande.';
+
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail
+          });
+        }
+      });
   }
 
   closeOrderDialog(): void {
