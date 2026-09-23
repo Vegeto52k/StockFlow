@@ -10,5 +10,7 @@ public interface IUnitOfWork
 
     IUserRepository Users { get; }
 
+    ISupplierRepository Suppliers { get; }
+
     Task<int> SaveChangesAsync();
 }

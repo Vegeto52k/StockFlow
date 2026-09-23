@@ -11,7 +11,8 @@ public class UnitOfWork : IUnitOfWork
         IClientRepository clients,
         IProductRepository products,
         IOrderRepository orders,
-        IUserRepository users)
+        IUserRepository users,
+        ISupplierRepository suppliers)
     {
         _context = context;
 
@@ -19,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
         Products = products;
         Orders = orders;
         Users = users;
+        Suppliers = suppliers;
     }
 
     public IClientRepository Clients { get; }
@@ -28,6 +30,8 @@ public class UnitOfWork : IUnitOfWork
     public IOrderRepository Orders { get; }
 
     public IUserRepository Users { get; }
+
+    public ISupplierRepository Suppliers { get; }
 
     public async Task<int> SaveChangesAsync()
     {

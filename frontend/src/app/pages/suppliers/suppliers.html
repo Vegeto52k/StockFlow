@@ -1,0 +1,256 @@
+<p-toast />
+
+<p-confirmdialog />
+
+<section class="suppliers-page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Fournisseurs</h2>
+
+      <p>
+        Gestion des fournisseurs de StockFlow.
+      </p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      (click)="openCreateDialog()"
+    >
+      <i class="pi pi-plus"></i>
+      <span>Nouveau fournisseur</span>
+    </button>
+
+  </div>
+
+
+  <p-table
+    [value]="suppliers()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+  >
+
+    <ng-template #header>
+      <tr>
+        <th>Entreprise</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Ville</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+
+    <ng-template
+      #body
+      let-supplier
+    >
+      <tr>
+
+        <td>
+          {{ supplier.name }}
+        </td>
+
+        <td>
+          {{ supplier.contactName }}
+        </td>
+
+        <td>
+          {{ supplier.email }}
+        </td>
+
+        <td>
+          {{ supplier.phone }}
+        </td>
+
+        <td>
+          {{ supplier.city }}
+        </td>
+
+        <td class="actions">
+
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            (click)="openEditDialog(supplier)"
+          >
+            <i class="pi pi-pencil"></i>
+          </button>
+
+          <button
+            pButton
+            type="button"
+            severity="danger"
+            (click)="confirmDelete(supplier)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+
+        </td>
+
+      </tr>
+    </ng-template>
+
+
+    <ng-template #emptymessage>
+      <tr>
+        <td
+          colspan="6"
+          class="empty-message"
+        >
+          Aucun fournisseur enregistré.
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</section>
+
+
+<p-dialog
+  [header]="
+    editingSupplierId === null
+      ? 'Nouveau fournisseur'
+      : 'Modifier le fournisseur'
+  "
+  [(visible)]="supplierDialogVisible"
+  [modal]="true"
+  [style]="{ width: '550px' }"
+>
+
+  <form
+    [formGroup]="supplierForm"
+    (ngSubmit)="saveSupplier()"
+  >
+
+    <div class="form-field">
+
+      <label for="name">
+        Entreprise
+      </label>
+
+      <input
+        pInputText
+        id="name"
+        formControlName="name"
+      />
+
+      @if (
+        supplierForm.controls.name.touched &&
+        supplierForm.controls.name.invalid
+      ) {
+        <small class="form-error">
+          Le nom de l'entreprise est obligatoire.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-field">
+
+      <label for="contactName">
+        Contact
+      </label>
+
+      <input
+        pInputText
+        id="contactName"
+        formControlName="contactName"
+      />
+
+    </div>
+
+
+    <div class="form-field">
+
+      <label for="email">
+        Email
+      </label>
+
+      <input
+        pInputText
+        id="email"
+        type="email"
+        formControlName="email"
+      />
+
+      @if (
+        supplierForm.controls.email.touched &&
+        supplierForm.controls.email.invalid
+      ) {
+        <small class="form-error">
+          L'adresse email n'est pas valide.
+        </small>
+      }
+
+    </div>
+
+
+    <div class="form-field">
+
+      <label for="phone">
+        Téléphone
+      </label>
+
+      <input
+        pInputText
+        id="phone"
+        formControlName="phone"
+      />
+
+    </div>
+
+
+    <div class="form-field">
+
+      <label for="city">
+        Ville
+      </label>
+
+      <input
+        pInputText
+        id="city"
+        formControlName="city"
+      />
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        pButton
+        type="button"
+        severity="secondary"
+        (click)="supplierDialogVisible = false"
+      >
+        Annuler
+      </button>
+
+      <button
+        pButton
+        type="submit"
+      >
+        <i class="pi pi-check"></i>
+
+        <span>
+          {{
+            editingSupplierId === null
+              ? 'Créer'
+              : 'Enregistrer'
+          }}
+        </span>
+      </button>
+
+    </div>
+
+  </form>
+
+</p-dialog>

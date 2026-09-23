@@ -44,6 +44,11 @@ builder.Services.AddScoped<
 >();
 
 builder.Services.AddScoped<
+    ISupplierRepository,
+    SupplierRepository
+>();
+
+builder.Services.AddScoped<
     IUnitOfWork,
     UnitOfWork
 >();
