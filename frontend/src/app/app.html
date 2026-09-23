@@ -1,63 +1,123 @@
-<div class="app-layout">
+@if (isAuthenticated()) {
 
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <i class="pi pi-chart-bar"></i>
-      <h1>{{ appTitle }}</h1>
-    </div>
+  <div class="app-layout">
 
-    <nav class="sidebar-nav">
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-      >
-        <i class="pi pi-home"></i>
-        <span>Dashboard</span>
-      </a>
+    <aside class="sidebar">
 
-      <a
-        routerLink="/clients"
-        routerLinkActive="active"
-      >
-        <i class="pi pi-users"></i>
-        <span>Clients</span>
-      </a>
+      <div class="sidebar-header">
+        <i class="pi pi-chart-bar"></i>
 
-      <a
-        routerLink="/products"
-        routerLinkActive="active"
-      >
-        <i class="pi pi-box"></i>
-        <span>Produits</span>
-      </a>
-
-      <a
-        routerLink="/orders"
-        routerLinkActive="active"
-      >
-        <i class="pi pi-shopping-cart"></i>
-        <span>Commandes</span>
-      </a>
-    </nav>
-  </aside>
-
-  <div class="main-area">
-
-    <header class="topbar">
-      <div>
-        <span class="application-name">Gestion commerciale</span>
+        <span>
+          {{ appTitle }}
+        </span>
       </div>
 
-      <button pButton routerLink="/orders">
-        <i class="pi pi-plus"></i>
-        <span>Nouvelle commande</span>
-      </button>
-    </header>
 
-    <main class="content">
-      <router-outlet />
-    </main>
+      <nav class="sidebar-nav">
+
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+        >
+          <i class="pi pi-home"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a
+          routerLink="/clients"
+          routerLinkActive="active"
+        >
+          <i class="pi pi-users"></i>
+          <span>Clients</span>
+        </a>
+
+        <a
+          routerLink="/products"
+          routerLinkActive="active"
+        >
+          <i class="pi pi-box"></i>
+          <span>Produits</span>
+        </a>
+
+        <a
+          routerLink="/orders"
+          routerLinkActive="active"
+        >
+          <i class="pi pi-shopping-cart"></i>
+          <span>Commandes</span>
+        </a>
+
+      </nav>
+
+    </aside>
+
+
+    <div class="main-area">
+
+      <header class="topbar">
+
+        <div class="topbar-title">
+          Gestion commerciale
+        </div>
+
+
+        <div class="topbar-actions">
+
+          <a
+            pButton
+            routerLink="/orders"
+          >
+            <i class="pi pi-plus"></i>
+            <span>Nouvelle commande</span>
+          </a>
+
+
+          <div class="current-user">
+
+            <div class="user-icon">
+              <i class="pi pi-user"></i>
+            </div>
+
+            <div class="user-info">
+
+              <strong>
+                {{ username() }}
+              </strong>
+
+              <span>
+                {{ role() }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            (click)="logout()"
+          >
+            <i class="pi pi-sign-out"></i>
+            <span>Déconnexion</span>
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <main class="content">
+        <router-outlet />
+      </main>
+
+    </div>
 
   </div>
 
-</div>
+} @else {
+
+  <router-outlet />
+
+}

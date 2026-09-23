@@ -8,15 +8,17 @@ public class UnitOfWork : IUnitOfWork
 
     public UnitOfWork(
         AppDbContext context,
-        IClientRepository clientRepository,
-        IProductRepository productRepository,
-        IOrderRepository orderRepository)
+        IClientRepository clients,
+        IProductRepository products,
+        IOrderRepository orders,
+        IUserRepository users)
     {
         _context = context;
 
-        Clients = clientRepository;
-        Products = productRepository;
-        Orders = orderRepository;
+        Clients = clients;
+        Products = products;
+        Orders = orders;
+        Users = users;
     }
 
     public IClientRepository Clients { get; }
@@ -24,6 +26,8 @@ public class UnitOfWork : IUnitOfWork
     public IProductRepository Products { get; }
 
     public IOrderRepository Orders { get; }
+
+    public IUserRepository Users { get; }
 
     public async Task<int> SaveChangesAsync()
     {

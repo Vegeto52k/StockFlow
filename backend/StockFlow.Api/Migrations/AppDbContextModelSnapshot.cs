@@ -126,6 +126,29 @@ namespace StockFlow.Api.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("StockFlow.Api.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("StockFlow.Api.Models.Order", b =>
                 {
                     b.HasOne("StockFlow.Api.Models.Client", "Client")

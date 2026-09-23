@@ -1,0 +1,84 @@
+.login-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: #0b0f14;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+
+  padding: 32px;
+
+  background: #16181d;
+
+  border: 1px solid #2e323a;
+  border-radius: 12px;
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-bottom: 28px;
+
+  text-align: center;
+
+  i {
+    margin-bottom: 12px;
+
+    font-size: 2rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+
+  p {
+    margin: 8px 0 0;
+
+    color: #9ca3af;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  label {
+    font-weight: 600;
+  }
+
+  input,
+  p-password {
+    width: 100%;
+  }
+}
+
+:host ::ng-deep .p-password {
+  width: 100%;
+}
+
+:host ::ng-deep .p-password-input {
+  width: 100%;
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+}

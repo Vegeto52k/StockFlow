@@ -1,0 +1,90 @@
+<p-toast />
+
+<section class="login-page">
+
+  <div class="login-card">
+
+    <div class="login-header">
+
+      <i class="pi pi-chart-bar"></i>
+
+      <h1>StockFlow</h1>
+
+      <p>
+        Connectez-vous à votre espace de gestion.
+      </p>
+
+    </div>
+
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="login()"
+    >
+
+      <div class="form-field">
+
+        <label for="username">
+          Nom d'utilisateur
+        </label>
+
+        <input
+          pInputText
+          id="username"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+        />
+
+        @if (
+          loginForm.controls.username.touched &&
+          loginForm.controls.username.invalid
+        ) {
+          <small class="form-error">
+            Le nom d'utilisateur est obligatoire.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="password">
+          Mot de passe
+        </label>
+
+        <p-password
+          inputId="password"
+          formControlName="password"
+          [feedback]="false"
+          [toggleMask]="true"
+          autocomplete="current-password"
+        />
+
+        @if (
+          loginForm.controls.password.touched &&
+          loginForm.controls.password.invalid
+        ) {
+          <small class="form-error">
+            Le mot de passe est obligatoire.
+          </small>
+        }
+
+      </div>
+
+
+      <button
+        pButton
+        type="submit"
+        [loading]="loading"
+      >
+        <i class="pi pi-sign-in"></i>
+        <span>Se connecter</span>
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
