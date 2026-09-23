@@ -1,42 +1,119 @@
-<section class="dashboard">
+<section class="dashboard-page">
 
   <div class="page-header">
     <div>
       <h2>Dashboard</h2>
-      <p>Vue d’ensemble de l’activité de StockFlow.</p>
+
+      <p>
+        Vue d'ensemble de l'activité de StockFlow.
+      </p>
     </div>
   </div>
 
-  <div class="stats-grid">
 
-    @for (stat of stats; track stat.label) {
+  @if (loading()) {
+
+    <p>
+      Chargement des statistiques...
+    </p>
+
+  } @else {
+
+    <div class="stats-grid">
 
       <p-card>
         <div class="stat-card">
 
           <div class="stat-icon">
-            <i [class]="stat.icon"></i>
+            <i class="pi pi-euro"></i>
           </div>
 
-          <div class="stat-content">
+          <div>
             <span class="stat-label">
-              {{ stat.label }}
+              Chiffre d'affaires
             </span>
 
             <strong class="stat-value">
-              {{ stat.value }}
+              {{
+                stats().revenue.toLocaleString(
+                  'fr-FR',
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }
+                )
+              }} €
             </strong>
-
-            <span class="stat-detail">
-              {{ stat.detail }}
-            </span>
           </div>
 
         </div>
       </p-card>
 
-    }
 
-  </div>
+      <p-card>
+        <div class="stat-card">
+
+          <div class="stat-icon">
+            <i class="pi pi-shopping-cart"></i>
+          </div>
+
+          <div>
+            <span class="stat-label">
+              Commandes
+            </span>
+
+            <strong class="stat-value">
+              {{ stats().orderCount }}
+            </strong>
+          </div>
+
+        </div>
+      </p-card>
+
+
+      <p-card>
+        <div class="stat-card">
+
+          <div class="stat-icon">
+            <i class="pi pi-users"></i>
+          </div>
+
+          <div>
+            <span class="stat-label">
+              Clients
+            </span>
+
+            <strong class="stat-value">
+              {{ stats().clientCount }}
+            </strong>
+          </div>
+
+        </div>
+      </p-card>
+
+
+      <p-card>
+        <div class="stat-card">
+
+          <div class="stat-icon">
+            <i class="pi pi-exclamation-triangle"></i>
+          </div>
+
+          <div>
+            <span class="stat-label">
+              Stock faible
+            </span>
+
+            <strong class="stat-value">
+              {{ stats().lowStockProductCount }}
+            </strong>
+          </div>
+
+        </div>
+      </p-card>
+
+    </div>
+
+  }
 
 </section>
