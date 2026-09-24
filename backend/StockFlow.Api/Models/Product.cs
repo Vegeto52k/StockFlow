@@ -15,4 +15,8 @@ public class Product
     public int StockQuantity { get; set; }
 
     public int MinimumStock { get; set; }
+
+    public int? SupplierId { get; set; }
+
+    public Supplier? Supplier { get; set; }
 }

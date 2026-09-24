@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+
 import {
   FormControl,
   FormGroup,
@@ -6,26 +12,41 @@ import {
   Validators
 } from '@angular/forms';
 
-import { ConfirmationService, MessageService } from 'primeng/api';
+import {
+  ConfirmationService,
+  MessageService
+} from 'primeng/api';
+
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 
-import { Product } from '../../models/product.model';
+import {
+  Product,
+  ProductSaveRequest
+} from '../../models/product.model';
+
+import { Supplier } from '../../models/supplier.model';
+
 import { ProductService } from '../../services/product';
+import { SupplierService } from '../../services/supplier';
 
 @Component({
   selector: 'app-products',
   imports: [
-    TableModule,
-    ButtonModule,
-    DialogModule,
-    InputTextModule,
     ReactiveFormsModule,
+    ButtonModule,
     ConfirmDialogModule,
+    DialogModule,
+    InputNumberModule,
+    InputTextModule,
+    SelectModule,
+    TableModule,
     ToastModule
   ],
   providers: [
@@ -37,82 +58,143 @@ import { ProductService } from '../../services/product';
 })
 export class Products implements OnInit {
 
-  private readonly productService = inject(ProductService);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly productService =
+    inject(ProductService);
+
+  private readonly supplierService =
+    inject(SupplierService);
+
+  private readonly confirmationService =
+    inject(ConfirmationService);
+
+  private readonly messageService =
+    inject(MessageService);
 
   products = signal<Product[]>([]);
 
+  suppliers = signal<Supplier[]>([]);
+
   productDialogVisible = false;
 
-  editedProductId: number | null = null;
+  editingProductId: number | null = null;
 
   productForm = new FormGroup({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
 
-    reference: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
+    name: new FormControl(
+      '',
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required
+        ]
+      }
+    ),
 
-    category: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    }),
+    reference: new FormControl(
+      '',
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required
+        ]
+      }
+    ),
 
-    unitPrice: new FormControl(0, {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.min(0.01)
-      ]
-    }),
+    category: new FormControl(
+      '',
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required
+        ]
+      }
+    ),
 
-    stockQuantity: new FormControl(0, {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.min(0)
-      ]
-    }),
+    unitPrice: new FormControl(
+      0,
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(0.01)
+        ]
+      }
+    ),
 
-    minimumStock: new FormControl(0, {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.min(0)
-      ]
-    })
+    stockQuantity: new FormControl(
+      0,
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(0)
+        ]
+      }
+    ),
+
+    minimumStock: new FormControl(
+      0,
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(0)
+        ]
+      }
+    ),
+
+    supplierId:
+      new FormControl<number | null>(
+        null
+      )
   });
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadSuppliers();
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe({
-      next: (products) => {
-        this.products.set(products);
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger les produits.'
-        });
-      }
-    });
+    this.productService
+      .getProducts()
+      .subscribe({
+        next: (products) => {
+          this.products.set(products);
+        },
+
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail:
+              'Impossible de charger les produits.'
+          });
+        }
+      });
   }
 
-  isLowStock(product: Product): boolean {
-    return product.stockQuantity <= product.minimumStock;
+  loadSuppliers(): void {
+    this.supplierService
+      .getSuppliers()
+      .subscribe({
+        next: (suppliers) => {
+          this.suppliers.set(suppliers);
+        },
+
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail:
+              'Impossible de charger les fournisseurs.'
+          });
+        }
+      });
   }
 
-  openCreateProductDialog(): void {
-    this.editedProductId = null;
+  openCreateDialog(): void {
+
+    this.editingProductId = null;
 
     this.productForm.reset({
       name: '',
@@ -120,14 +202,19 @@ export class Products implements OnInit {
       category: '',
       unitPrice: 0,
       stockQuantity: 0,
-      minimumStock: 0
+      minimumStock: 0,
+      supplierId: null
     });
 
     this.productDialogVisible = true;
   }
 
-  openEditProductDialog(product: Product): void {
-    this.editedProductId = product.id;
+  openEditDialog(
+    product: Product
+  ): void {
+
+    this.editingProductId =
+      product.id;
 
     this.productForm.setValue({
       name: product.name,
@@ -135,96 +222,97 @@ export class Products implements OnInit {
       category: product.category,
       unitPrice: product.unitPrice,
       stockQuantity: product.stockQuantity,
-      minimumStock: product.minimumStock
+      minimumStock: product.minimumStock,
+      supplierId: product.supplierId
     });
 
     this.productDialogVisible = true;
   }
 
   saveProduct(): void {
+
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
       return;
     }
 
-    const productData = this.productForm.getRawValue();
+    const product: ProductSaveRequest =
+      this.productForm.getRawValue();
 
-    if (this.editedProductId === null) {
-      this.createProduct(productData);
+    if (this.editingProductId === null) {
+
+      this.productService
+        .createProduct(product)
+        .subscribe({
+          next: () => {
+
+            this.loadProducts();
+
+            this.productDialogVisible =
+              false;
+
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Produit créé',
+              detail:
+                'Le produit a été ajouté.'
+            });
+          },
+
+          error: () => {
+            this.showSaveError();
+          }
+        });
+
       return;
     }
 
-    this.updateProduct(
-      this.editedProductId,
-      productData
-    );
+    this.productService
+      .updateProduct(
+        this.editingProductId,
+        product
+      )
+      .subscribe({
+        next: () => {
+
+          this.loadProducts();
+
+          this.productDialogVisible =
+            false;
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Produit modifié',
+            detail:
+              'Les informations ont été mises à jour.'
+          });
+        },
+
+        error: () => {
+          this.showSaveError();
+        }
+      });
   }
 
-  createProduct(productData: Omit<Product, 'id'>): void {
-    this.productService.createProduct(productData).subscribe({
-      next: (createdProduct) => {
-        this.products.update(products => [
-          ...products,
-          createdProduct
-        ]);
-
-        this.closeProductDialog();
-
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Produit créé',
-          detail: `${createdProduct.name} a été ajouté.`
-        });
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de créer le produit.'
-        });
-      }
-    });
-  }
-
-  updateProduct(
-    id: number,
-    productData: Omit<Product, 'id'>
+  confirmDelete(
+    product: Product
   ): void {
-    this.productService.updateProduct(id, productData).subscribe({
-      next: (updatedProduct) => {
-        this.products.update(products =>
-          products.map(product =>
-            product.id === updatedProduct.id
-              ? updatedProduct
-              : product
-          )
-        );
 
-        this.closeProductDialog();
-
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Produit modifié',
-          detail: `${updatedProduct.name} a été mis à jour.`
-        });
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de modifier le produit.'
-        });
-      }
-    });
-  }
-
-  confirmDeleteProduct(product: Product): void {
     this.confirmationService.confirm({
-      header: 'Supprimer le produit',
-      message: `Voulez-vous vraiment supprimer ${product.name} ?`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
+      message:
+        `Supprimer le produit "${product.name}" ?`,
+
+      header:
+        'Confirmation de suppression',
+
+      icon:
+        'pi pi-exclamation-triangle',
+
+      acceptLabel:
+        'Supprimer',
+
+      rejectLabel:
+        'Annuler',
 
       accept: () => {
         this.deleteProduct(product);
@@ -232,34 +320,59 @@ export class Products implements OnInit {
     });
   }
 
-  deleteProduct(product: Product): void {
-    this.productService.deleteProduct(product.id).subscribe({
-      next: () => {
-        this.products.update(products =>
-          products.filter(
-            existingProduct =>
-              existingProduct.id !== product.id
-          )
-        );
+  private deleteProduct(
+    product: Product
+  ): void {
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Produit supprimé',
-          detail: `${product.name} a été supprimé.`
-        });
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de supprimer le produit.'
-        });
-      }
-    });
+    this.productService
+      .deleteProduct(product.id)
+      .subscribe({
+        next: () => {
+
+          this.products.update(
+            products =>
+              products.filter(
+                currentProduct =>
+                  currentProduct.id !==
+                  product.id
+              )
+          );
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Produit supprimé',
+            detail:
+              'Le produit a été supprimé.'
+          });
+        },
+
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail:
+              'Impossible de supprimer le produit.'
+          });
+        }
+      });
   }
 
-  closeProductDialog(): void {
-    this.productDialogVisible = false;
-    this.editedProductId = null;
+  isLowStock(
+    product: Product
+  ): boolean {
+    return (
+      product.stockQuantity <=
+      product.minimumStock
+    );
+  }
+
+  private showSaveError(): void {
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail:
+        'Impossible d’enregistrer le produit.'
+    });
   }
 }

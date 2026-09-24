@@ -283,12 +283,18 @@ export class Suppliers implements OnInit {
           });
         },
 
-        error: () => {
+        error: (error) => {
+
+          const detail =
+            typeof error.error === 'string'
+              ? error.error
+              : error.error?.detail
+                ?? 'Impossible de supprimer le fournisseur.';
+
           this.messageService.add({
             severity: 'error',
-            summary: 'Erreur',
-            detail:
-              'Impossible de supprimer le fournisseur.'
+            summary: 'Suppression impossible',
+            detail
           });
         }
       });

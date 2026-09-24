@@ -17,6 +17,7 @@ public class ProductRepository : IProductRepository
     {
         return await _context.Products
             .AsNoTracking()
+            .Include(product => product.Supplier)
             .ToListAsync();
     }
 
@@ -24,17 +25,33 @@ public class ProductRepository : IProductRepository
     {
         return await _context.Products
             .AsNoTracking()
-            .FirstOrDefaultAsync(product => product.Id == id);
+            .Include(product => product.Supplier)
+            .FirstOrDefaultAsync(
+                product => product.Id == id
+            );
+    }
+
+    public async Task<Product?> GetByIdForUpdateAsync(int id)
+    {
+        return await _context.Products
+            .FirstOrDefaultAsync(
+                product => product.Id == id
+            );
+    }
+
+    public async Task<bool> ExistsForSupplierAsync(
+        int supplierId)
+    {
+        return await _context.Products
+            .AnyAsync(
+                product =>
+                    product.SupplierId == supplierId
+            );
     }
 
     public async Task AddAsync(Product product)
     {
         await _context.Products.AddAsync(product);
-    }
-
-    public void Update(Product product)
-    {
-        _context.Products.Update(product);
     }
 
     public void Delete(Product product)

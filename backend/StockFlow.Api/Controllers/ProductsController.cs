@@ -18,15 +18,18 @@ public class ProductsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
     {
-        var products = await _unitOfWork.Products.GetAllAsync();
+        var products =
+            await _unitOfWork.Products.GetAllAsync();
 
         return Ok(products);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Product>> GetProductById(int id)
+    public async Task<ActionResult<Product>> GetProductById(
+        int id)
     {
-        var product = await _unitOfWork.Products.GetByIdAsync(id);
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
 
         if (product is null)
         {
@@ -37,50 +40,106 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Product>> CreateProduct(Product product)
+    public async Task<ActionResult<Product>> CreateProduct(
+        Product product)
     {
+        if (product.SupplierId is not null)
+        {
+            var supplier =
+                await _unitOfWork.Suppliers.GetByIdAsync(
+                    product.SupplierId.Value
+                );
+
+            if (supplier is null)
+            {
+                return BadRequest(
+                    "Le fournisseur sélectionné n'existe pas."
+                );
+            }
+        }
+
         await _unitOfWork.Products.AddAsync(product);
 
         await _unitOfWork.SaveChangesAsync();
 
+        var createdProduct =
+            await _unitOfWork.Products.GetByIdAsync(
+                product.Id
+            );
+
         return CreatedAtAction(
             nameof(GetProductById),
             new { id = product.Id },
-            product
+            createdProduct
         );
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<Product>> UpdateProduct(
+    public async Task<IActionResult> UpdateProduct(
         int id,
-        Product updatedProduct)
+        Product request)
     {
-        var existingProduct =
-            await _unitOfWork.Products.GetByIdAsync(id);
+        if (id != request.Id)
+        {
+            return BadRequest();
+        }
 
-        if (existingProduct is null)
+        var product =
+            await _unitOfWork.Products
+                .GetByIdForUpdateAsync(id);
+
+        if (product is null)
         {
             return NotFound();
         }
 
-        existingProduct.Name = updatedProduct.Name;
-        existingProduct.Reference = updatedProduct.Reference;
-        existingProduct.Category = updatedProduct.Category;
-        existingProduct.UnitPrice = updatedProduct.UnitPrice;
-        existingProduct.StockQuantity = updatedProduct.StockQuantity;
-        existingProduct.MinimumStock = updatedProduct.MinimumStock;
+        if (request.SupplierId is not null)
+        {
+            var supplier =
+                await _unitOfWork.Suppliers.GetByIdAsync(
+                    request.SupplierId.Value
+                );
 
-        _unitOfWork.Products.Update(existingProduct);
+            if (supplier is null)
+            {
+                return BadRequest(
+                    "Le fournisseur sélectionné n'existe pas."
+                );
+            }
+        }
+
+        product.Name =
+            request.Name;
+
+        product.Reference =
+            request.Reference;
+
+        product.Category =
+            request.Category;
+
+        product.UnitPrice =
+            request.UnitPrice;
+
+        product.StockQuantity =
+            request.StockQuantity;
+
+        product.MinimumStock =
+            request.MinimumStock;
+
+        product.SupplierId =
+            request.SupplierId;
 
         await _unitOfWork.SaveChangesAsync();
 
-        return Ok(existingProduct);
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteProduct(int id)
+    public async Task<IActionResult> DeleteProduct(
+        int id)
     {
-        var product = await _unitOfWork.Products.GetByIdAsync(id);
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
 
         if (product is null)
         {

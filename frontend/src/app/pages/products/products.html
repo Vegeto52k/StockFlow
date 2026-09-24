@@ -8,19 +8,23 @@
 
     <div>
       <h2>Produits</h2>
-      <p>Gestion du catalogue et des stocks de StockFlow.</p>
+
+      <p>
+        Gestion du catalogue et des stocks de StockFlow.
+      </p>
     </div>
 
     <button
       pButton
       type="button"
-      (click)="openCreateProductDialog()"
+      (click)="openCreateDialog()"
     >
       <i class="pi pi-plus"></i>
       <span>Nouveau produit</span>
     </button>
 
   </div>
+
 
   <p-table
     [value]="products()"
@@ -31,10 +35,10 @@
 
     <ng-template #header>
       <tr>
-        <th>ID</th>
-        <th>Référence</th>
         <th>Produit</th>
+        <th>Référence</th>
         <th>Catégorie</th>
+        <th>Fournisseur</th>
         <th>Prix unitaire</th>
         <th>Stock</th>
         <th>Stock minimum</th>
@@ -43,36 +47,55 @@
       </tr>
     </ng-template>
 
-    <ng-template #body let-product>
+
+    <ng-template
+      #body
+      let-product
+    >
       <tr>
 
-        <td>{{ product.id }}</td>
+        <td>
+          {{ product.name }}
+        </td>
 
-        <td>{{ product.reference }}</td>
+        <td>
+          {{ product.reference }}
+        </td>
 
-        <td>{{ product.name }}</td>
+        <td>
+          {{ product.category }}
+        </td>
 
-        <td>{{ product.category }}</td>
+        <td>
+          {{
+            product.supplier?.name
+              ?? 'Non renseigné'
+          }}
+        </td>
 
-        <td>{{ product.unitPrice }} €</td>
+        <td>
+          {{ product.unitPrice }} €
+        </td>
 
-        <td>{{ product.stockQuantity }}</td>
+        <td>
+          {{ product.stockQuantity }}
+        </td>
 
-        <td>{{ product.minimumStock }}</td>
+        <td>
+          {{ product.minimumStock }}
+        </td>
 
         <td>
 
           @if (isLowStock(product)) {
 
-            <span class="stock-status low-stock">
-              <i class="pi pi-exclamation-triangle"></i>
+            <span class="stock-low">
               Stock faible
             </span>
 
           } @else {
 
-            <span class="stock-status available-stock">
-              <i class="pi pi-check-circle"></i>
+            <span class="stock-ok">
               Disponible
             </span>
 
@@ -80,32 +103,40 @@
 
         </td>
 
-        <td>
+        <td class="actions">
 
-          <div class="table-actions">
+          <button
+            pButton
+            type="button"
+            severity="secondary"
+            (click)="openEditDialog(product)"
+          >
+            <i class="pi pi-pencil"></i>
+          </button>
 
-            <button
-              pButton
-              type="button"
-              severity="secondary"
-              (click)="openEditProductDialog(product)"
-            >
-              <i class="pi pi-pencil"></i>
-              <span>Modifier</span>
-            </button>
+          <button
+            pButton
+            type="button"
+            severity="danger"
+            (click)="confirmDelete(product)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
 
-            <button
-              pButton
-              type="button"
-              severity="danger"
-              (click)="confirmDeleteProduct(product)"
-            >
-              <i class="pi pi-trash"></i>
-              <span>Supprimer</span>
-            </button>
+        </td>
 
-          </div>
+      </tr>
+    </ng-template>
 
+
+    <ng-template #emptymessage>
+      <tr>
+
+        <td
+          colspan="9"
+          class="empty-message"
+        >
+          Aucun produit enregistré.
         </td>
 
       </tr>
@@ -115,11 +146,16 @@
 
 </section>
 
+
 <p-dialog
-  [header]="editedProductId === null ? 'Nouveau produit' : 'Modifier le produit'"
+  [header]="
+    editingProductId === null
+      ? 'Nouveau produit'
+      : 'Modifier le produit'
+  "
   [(visible)]="productDialogVisible"
   [modal]="true"
-  [style]="{ width: '550px' }"
+  [style]="{ width: '600px' }"
 >
 
   <form
@@ -129,136 +165,119 @@
 
     <div class="form-field">
 
-      <label for="name">Nom</label>
+      <label for="name">
+        Produit
+      </label>
 
       <input
-        id="name"
-        type="text"
         pInputText
+        id="name"
         formControlName="name"
       />
 
-      @if (
-        productForm.controls.name.touched &&
-        productForm.controls.name.invalid
-      ) {
-        <small class="form-error">
-          Le nom est obligatoire.
-        </small>
-      }
-
     </div>
+
 
     <div class="form-field">
 
-      <label for="reference">Référence</label>
+      <label for="reference">
+        Référence
+      </label>
 
       <input
-        id="reference"
-        type="text"
         pInputText
+        id="reference"
         formControlName="reference"
       />
 
-      @if (
-        productForm.controls.reference.touched &&
-        productForm.controls.reference.invalid
-      ) {
-        <small class="form-error">
-          La référence est obligatoire.
-        </small>
-      }
-
     </div>
+
 
     <div class="form-field">
 
-      <label for="category">Catégorie</label>
+      <label for="category">
+        Catégorie
+      </label>
 
       <input
-        id="category"
-        type="text"
         pInputText
+        id="category"
         formControlName="category"
       />
 
-      @if (
-        productForm.controls.category.touched &&
-        productForm.controls.category.invalid
-      ) {
-        <small class="form-error">
-          La catégorie est obligatoire.
-        </small>
-      }
-
     </div>
+
 
     <div class="form-field">
 
-      <label for="unitPrice">Prix unitaire</label>
+      <label for="supplier">
+        Fournisseur
+      </label>
 
-      <input
-        id="unitPrice"
-        type="number"
-        step="0.01"
-        pInputText
+      <p-select
+        inputId="supplier"
+        formControlName="supplierId"
+        [options]="suppliers()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner un fournisseur"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="name"
+      />
+
+    </div>
+
+
+    <div class="form-field">
+
+      <label for="unitPrice">
+        Prix unitaire
+      </label>
+
+      <p-inputnumber
+        inputId="unitPrice"
         formControlName="unitPrice"
+        mode="currency"
+        currency="EUR"
+        locale="fr-FR"
+        [min]="0"
       />
-
-      @if (
-        productForm.controls.unitPrice.touched &&
-        productForm.controls.unitPrice.invalid
-      ) {
-        <small class="form-error">
-          Le prix doit être supérieur à 0.
-        </small>
-      }
 
     </div>
 
+
     <div class="form-field">
 
-      <label for="stockQuantity">Quantité en stock</label>
+      <label for="stockQuantity">
+        Quantité en stock
+      </label>
 
-      <input
-        id="stockQuantity"
-        type="number"
-        pInputText
+      <p-inputnumber
+        inputId="stockQuantity"
         formControlName="stockQuantity"
+        [min]="0"
+        [showButtons]="true"
       />
 
-      @if (
-        productForm.controls.stockQuantity.touched &&
-        productForm.controls.stockQuantity.invalid
-      ) {
-        <small class="form-error">
-          Le stock ne peut pas être négatif.
-        </small>
-      }
-
     </div>
+
 
     <div class="form-field">
 
-      <label for="minimumStock">Stock minimum</label>
+      <label for="minimumStock">
+        Stock minimum
+      </label>
 
-      <input
-        id="minimumStock"
-        type="number"
-        pInputText
+      <p-inputnumber
+        inputId="minimumStock"
         formControlName="minimumStock"
+        [min]="0"
+        [showButtons]="true"
       />
 
-      @if (
-        productForm.controls.minimumStock.touched &&
-        productForm.controls.minimumStock.invalid
-      ) {
-        <small class="form-error">
-          Le stock minimum ne peut pas être négatif.
-        </small>
-      }
-
     </div>
+
 
     <div class="form-actions">
 
@@ -266,9 +285,9 @@
         pButton
         type="button"
         severity="secondary"
-        (click)="closeProductDialog()"
+        (click)="productDialogVisible = false"
       >
-        <span>Annuler</span>
+        Annuler
       </button>
 
       <button
@@ -277,12 +296,13 @@
       >
         <i class="pi pi-check"></i>
 
-        @if (editedProductId === null) {
-          <span>Créer</span>
-        } @else {
-          <span>Enregistrer</span>
-        }
-
+        <span>
+          {{
+            editingProductId === null
+              ? 'Créer'
+              : 'Enregistrer'
+          }}
+        </span>
       </button>
 
     </div>

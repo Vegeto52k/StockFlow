@@ -95,6 +95,17 @@ public class SuppliersController : ControllerBase
             return NotFound();
         }
 
+        var hasProducts =
+            await _unitOfWork.Products
+                .ExistsForSupplierAsync(id);
+
+        if (hasProducts)
+        {
+            return Conflict(
+                "Ce fournisseur est associé à un ou plusieurs produits et ne peut pas être supprimé."
+            );
+        }
+
         _unitOfWork.Suppliers.Delete(
             supplier
         );

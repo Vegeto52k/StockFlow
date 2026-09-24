@@ -8,9 +8,11 @@ public interface IProductRepository
 
     Task<Product?> GetByIdAsync(int id);
 
-    Task AddAsync(Product product);
+    Task<Product?> GetByIdForUpdateAsync(int id);
 
-    void Update(Product product);
+    Task<bool> ExistsForSupplierAsync(int supplierId);
+
+    Task AddAsync(Product product);
 
     void Delete(Product product);
 }

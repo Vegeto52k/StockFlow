@@ -2,7 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Product } from '../models/product.model';
+import {
+  Product,
+  ProductSaveRequest
+} from '../models/product.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,14 +14,25 @@ export class ProductService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:5166/api/products';
+  private readonly apiUrl =
+    'http://localhost:5166/api/products';
 
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+    return this.http.get<Product[]>(
+      this.apiUrl
+    );
+  }
+
+  getProductById(
+    id: number
+  ): Observable<Product> {
+    return this.http.get<Product>(
+      `${this.apiUrl}/${id}`
+    );
   }
 
   createProduct(
-    product: Omit<Product, 'id'>
+    product: ProductSaveRequest
   ): Observable<Product> {
     return this.http.post<Product>(
       this.apiUrl,
@@ -28,15 +42,20 @@ export class ProductService {
 
   updateProduct(
     id: number,
-    product: Omit<Product, 'id'>
-  ): Observable<Product> {
-    return this.http.put<Product>(
+    product: ProductSaveRequest
+  ): Observable<void> {
+    return this.http.put<void>(
       `${this.apiUrl}/${id}`,
-      product
+      {
+        id,
+        ...product
+      }
     );
   }
 
-  deleteProduct(id: number): Observable<void> {
+  deleteProduct(
+    id: number
+  ): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`
     );
