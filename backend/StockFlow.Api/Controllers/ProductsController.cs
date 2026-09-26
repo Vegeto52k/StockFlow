@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using StockFlow.Api.Dtos;
 using StockFlow.Api.Models;
 using StockFlow.Api.Repositories;
 
@@ -41,13 +42,13 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<Product>> CreateProduct(
-        Product product)
+        ProductSaveRequest request)
     {
-        if (product.SupplierId is not null)
+        if (request.SupplierId is not null)
         {
             var supplier =
                 await _unitOfWork.Suppliers.GetByIdAsync(
-                    product.SupplierId.Value
+                    request.SupplierId.Value
                 );
 
             if (supplier is null)
@@ -58,7 +59,22 @@ public class ProductsController : ControllerBase
             }
         }
 
-        await _unitOfWork.Products.AddAsync(product);
+        var product = new Product
+        {
+            Name = request.Name,
+            Reference = request.Reference,
+            Category = request.Category,
+            UnitPrice = request.UnitPrice,
+            MinimumStock = request.MinimumStock,
+            SupplierId = request.SupplierId,
+
+            // Tout nouveau produit commence à zéro.
+            StockQuantity = 0
+        };
+
+        await _unitOfWork.Products.AddAsync(
+            product
+        );
 
         await _unitOfWork.SaveChangesAsync();
 
@@ -77,13 +93,8 @@ public class ProductsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateProduct(
         int id,
-        Product request)
+        ProductSaveRequest request)
     {
-        if (id != request.Id)
-        {
-            return BadRequest();
-        }
-
         var product =
             await _unitOfWork.Products
                 .GetByIdForUpdateAsync(id);
@@ -120,9 +131,6 @@ public class ProductsController : ControllerBase
         product.UnitPrice =
             request.UnitPrice;
 
-        product.StockQuantity =
-            request.StockQuantity;
-
         product.MinimumStock =
             request.MinimumStock;
 
@@ -132,6 +140,69 @@ public class ProductsController : ControllerBase
         await _unitOfWork.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    [HttpPost("{id:int}/restock")]
+    public async Task<ActionResult<Product>> RestockProduct(
+        int id,
+        RestockProductRequest request)
+    {
+        if (request.Quantity <= 0)
+        {
+            return BadRequest(
+                "La quantité de réapprovisionnement doit être supérieure à zéro."
+            );
+        }
+
+        var product =
+            await _unitOfWork.Products
+                .GetByIdForUpdateAsync(id);
+
+        if (product is null)
+        {
+            return NotFound(
+                "Le produit demandé n'existe pas."
+            );
+        }
+
+        var reason =
+            string.IsNullOrWhiteSpace(request.Reason)
+                ? "Réapprovisionnement"
+                : request.Reason.Trim();
+
+        product.StockQuantity +=
+            request.Quantity;
+
+        await _unitOfWork.StockMovements.AddAsync(
+            new StockMovement
+            {
+                ProductId = product.Id,
+
+                QuantityChange =
+                    request.Quantity,
+
+                Type = "Restock",
+
+                Reason = reason,
+
+                CreatedAt =
+                    DateTime.UtcNow
+            }
+        );
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var updatedProduct =
+            await _unitOfWork.Products.GetByIdAsync(
+                id
+            );
+
+        if (updatedProduct is null)
+        {
+            return StatusCode(500);
+        }
+
+        return Ok(updatedProduct);
     }
 
     [HttpDelete("{id:int}")]

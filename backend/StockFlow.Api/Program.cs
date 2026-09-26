@@ -49,6 +49,11 @@ builder.Services.AddScoped<
 >();
 
 builder.Services.AddScoped<
+    IStockMovementRepository,
+    StockMovementRepository
+>();
+
+builder.Services.AddScoped<
     IUnitOfWork,
     UnitOfWork
 >();
@@ -63,7 +68,8 @@ builder.Services.AddScoped<
     TokenService
 >();
 
-var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtKey =
+    builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
@@ -92,14 +98,20 @@ builder.Services
                 ValidateIssuerSigningKey = true,
 
                 ValidIssuer =
-                    builder.Configuration["Jwt:Issuer"],
+                    builder.Configuration[
+                        "Jwt:Issuer"
+                    ],
 
                 ValidAudience =
-                    builder.Configuration["Jwt:Audience"],
+                    builder.Configuration[
+                        "Jwt:Audience"
+                    ],
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtKey)
+                        Encoding.UTF8.GetBytes(
+                            jwtKey
+                        )
                     ),
 
                 ClockSkew = TimeSpan.Zero
@@ -119,7 +131,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Angular", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins(
+                "http://localhost:4200"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

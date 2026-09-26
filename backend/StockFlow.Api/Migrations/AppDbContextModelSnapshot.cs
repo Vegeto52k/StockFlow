@@ -131,6 +131,41 @@ namespace StockFlow.Api.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("StockFlow.Api.Models.StockMovement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuantityChange")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("StockMovements");
+                });
+
             modelBuilder.Entity("StockFlow.Api.Models.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -222,6 +257,23 @@ namespace StockFlow.Api.Migrations
                         .HasForeignKey("SupplierId");
 
                     b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("StockFlow.Api.Models.StockMovement", b =>
+                {
+                    b.HasOne("StockFlow.Api.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId");
+
+                    b.HasOne("StockFlow.Api.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("StockFlow.Api.Models.Order", b =>

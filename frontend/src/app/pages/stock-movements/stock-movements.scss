@@ -1,0 +1,71 @@
+.stock-movements-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  h2 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #6b7280;
+  }
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  width: 320px;
+
+  label {
+    font-weight: 600;
+  }
+
+  p-select {
+    width: 100%;
+  }
+}
+
+.movement-in,
+.movement-out {
+  display: inline-block;
+
+  min-width: 48px;
+
+  padding: 5px 10px;
+
+  border-radius: 6px;
+
+  text-align: center;
+  font-weight: 700;
+}
+
+.movement-in {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.movement-out {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.empty-message {
+  padding: 32px;
+
+  text-align: center;
+
+  color: #6b7280;
+}

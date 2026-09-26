@@ -76,7 +76,15 @@ export class Products implements OnInit {
 
   productDialogVisible = false;
 
+  restockDialogVisible = false;
+
   editingProductId: number | null = null;
+
+  editingProduct =
+    signal<Product | null>(null);
+
+  restockingProduct =
+    signal<Product | null>(null);
 
   productForm = new FormGroup({
 
@@ -121,17 +129,6 @@ export class Products implements OnInit {
       }
     ),
 
-    stockQuantity: new FormControl(
-      0,
-      {
-        nonNullable: true,
-        validators: [
-          Validators.required,
-          Validators.min(0)
-        ]
-      }
-    ),
-
     minimumStock: new FormControl(
       0,
       {
@@ -149,12 +146,34 @@ export class Products implements OnInit {
       )
   });
 
+  restockForm = new FormGroup({
+
+    quantity: new FormControl(
+      1,
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(1)
+        ]
+      }
+    ),
+
+    reason: new FormControl(
+      '',
+      {
+        nonNullable: true
+      }
+    )
+  });
+
   ngOnInit(): void {
     this.loadProducts();
     this.loadSuppliers();
   }
 
   loadProducts(): void {
+
     this.productService
       .getProducts()
       .subscribe({
@@ -174,6 +193,7 @@ export class Products implements OnInit {
   }
 
   loadSuppliers(): void {
+
     this.supplierService
       .getSuppliers()
       .subscribe({
@@ -196,12 +216,13 @@ export class Products implements OnInit {
 
     this.editingProductId = null;
 
+    this.editingProduct.set(null);
+
     this.productForm.reset({
       name: '',
       reference: '',
       category: '',
       unitPrice: 0,
-      stockQuantity: 0,
       minimumStock: 0,
       supplierId: null
     });
@@ -216,17 +237,36 @@ export class Products implements OnInit {
     this.editingProductId =
       product.id;
 
+    this.editingProduct.set(
+      product
+    );
+
     this.productForm.setValue({
       name: product.name,
       reference: product.reference,
       category: product.category,
       unitPrice: product.unitPrice,
-      stockQuantity: product.stockQuantity,
       minimumStock: product.minimumStock,
       supplierId: product.supplierId
     });
 
     this.productDialogVisible = true;
+  }
+
+  openRestockDialog(
+    product: Product
+  ): void {
+
+    this.restockingProduct.set(
+      product
+    );
+
+    this.restockForm.reset({
+      quantity: 1,
+      reason: ''
+    });
+
+    this.restockDialogVisible = true;
   }
 
   saveProduct(): void {
@@ -255,7 +295,7 @@ export class Products implements OnInit {
               severity: 'success',
               summary: 'Produit créé',
               detail:
-                'Le produit a été ajouté.'
+                'Le produit a été ajouté avec un stock initial de 0.'
             });
           },
 
@@ -280,6 +320,8 @@ export class Products implements OnInit {
           this.productDialogVisible =
             false;
 
+          this.editingProduct.set(null);
+
           this.messageService.add({
             severity: 'success',
             summary: 'Produit modifié',
@@ -290,6 +332,75 @@ export class Products implements OnInit {
 
         error: () => {
           this.showSaveError();
+        }
+      });
+  }
+
+  restockProduct(): void {
+
+    if (this.restockForm.invalid) {
+      this.restockForm.markAllAsTouched();
+      return;
+    }
+
+    const product =
+      this.restockingProduct();
+
+    if (product === null) {
+      return;
+    }
+
+    const formValue =
+      this.restockForm.getRawValue();
+
+    this.productService
+      .restockProduct(
+        product.id,
+        formValue.quantity,
+        formValue.reason
+      )
+      .subscribe({
+        next: (updatedProduct) => {
+
+          this.products.update(
+            products =>
+              products.map(
+                currentProduct =>
+                  currentProduct.id ===
+                  updatedProduct.id
+                    ? updatedProduct
+                    : currentProduct
+              )
+          );
+
+          this.restockDialogVisible =
+            false;
+
+          this.restockingProduct.set(
+            null
+          );
+
+          this.messageService.add({
+            severity: 'success',
+            summary:
+              'Stock réapprovisionné',
+            detail:
+              `Le stock de "${updatedProduct.name}" a été augmenté de ${formValue.quantity}.`
+          });
+        },
+
+        error: (error) => {
+
+          const detail =
+            typeof error.error === 'string'
+              ? error.error
+              : 'Impossible de réapprovisionner le produit.';
+
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail
+          });
         }
       });
   }
@@ -360,6 +471,7 @@ export class Products implements OnInit {
   isLowStock(
     product: Product
   ): boolean {
+
     return (
       product.stockQuantity <=
       product.minimumStock

@@ -108,8 +108,19 @@
           <button
             pButton
             type="button"
+            severity="success"
+            (click)="openRestockDialog(product)"
+            title="Réapprovisionner"
+          >
+            <i class="pi pi-plus-circle"></i>
+          </button>
+
+          <button
+            pButton
+            type="button"
             severity="secondary"
             (click)="openEditDialog(product)"
+            title="Modifier"
           >
             <i class="pi pi-pencil"></i>
           </button>
@@ -119,6 +130,7 @@
             type="button"
             severity="danger"
             (click)="confirmDelete(product)"
+            title="Supprimer"
           >
             <i class="pi pi-trash"></i>
           </button>
@@ -249,22 +261,6 @@
 
     <div class="form-field">
 
-      <label for="stockQuantity">
-        Quantité en stock
-      </label>
-
-      <p-inputnumber
-        inputId="stockQuantity"
-        formControlName="stockQuantity"
-        [min]="0"
-        [showButtons]="true"
-      />
-
-    </div>
-
-
-    <div class="form-field">
-
       <label for="minimumStock">
         Stock minimum
       </label>
@@ -277,6 +273,45 @@
       />
 
     </div>
+
+
+    @if (editingProduct(); as product) {
+
+      <div class="form-field">
+
+        <label>
+          Quantité en stock
+        </label>
+
+        <div class="stock-readonly">
+          {{ product.stockQuantity }}
+        </div>
+
+        <small>
+          Le stock se modifie via les mouvements de stock.
+        </small>
+
+      </div>
+
+    } @else {
+
+      <div class="form-field">
+
+        <label>
+          Stock initial
+        </label>
+
+        <div class="stock-readonly">
+          0
+        </div>
+
+        <small>
+          Le nouveau produit commencera avec un stock de 0.
+        </small>
+
+      </div>
+
+    }
 
 
     <div class="form-actions">
@@ -308,5 +343,103 @@
     </div>
 
   </form>
+
+</p-dialog>
+
+
+<p-dialog
+  header="Réapprovisionner le produit"
+  [(visible)]="restockDialogVisible"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+>
+
+  @if (restockingProduct(); as product) {
+
+    <form
+      [formGroup]="restockForm"
+      (ngSubmit)="restockProduct()"
+    >
+
+      <div class="restock-product-info">
+
+        <strong>
+          {{ product.name }}
+        </strong>
+
+        <span>
+          Stock actuel :
+          {{ product.stockQuantity }}
+        </span>
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="restockQuantity">
+          Quantité à ajouter
+        </label>
+
+        <p-inputnumber
+          inputId="restockQuantity"
+          formControlName="quantity"
+          [min]="1"
+          [showButtons]="true"
+        />
+
+        @if (
+          restockForm.controls.quantity.touched &&
+          restockForm.controls.quantity.invalid
+        ) {
+          <small class="form-error">
+            La quantité doit être supérieure à zéro.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="restockReason">
+          Motif
+        </label>
+
+        <input
+          pInputText
+          id="restockReason"
+          formControlName="reason"
+          placeholder="Ex. Livraison fournisseur"
+        />
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button
+          pButton
+          type="button"
+          severity="secondary"
+          (click)="restockDialogVisible = false"
+        >
+          Annuler
+        </button>
+
+        <button
+          pButton
+          type="submit"
+          severity="success"
+        >
+          <i class="pi pi-plus-circle"></i>
+          <span>Réapprovisionner</span>
+        </button>
+
+      </div>
+
+    </form>
+
+  }
 
 </p-dialog>

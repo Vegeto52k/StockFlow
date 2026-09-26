@@ -104,6 +104,10 @@ public class OrdersController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+        await _unitOfWork.Orders.AddAsync(
+            order
+        );
+
         foreach (
             var requestedItem in request.Items
         )
@@ -144,11 +148,27 @@ public class OrdersController : ControllerBase
                         product.UnitPrice
                 }
             );
-        }
 
-        await _unitOfWork.Orders.AddAsync(
-            order
-        );
+            await _unitOfWork.StockMovements.AddAsync(
+                new StockMovement
+                {
+                    ProductId = product.Id,
+
+                    Order = order,
+
+                    QuantityChange =
+                        -requestedItem.Quantity,
+
+                    Type = "Order",
+
+                    Reason =
+                        "Création de commande",
+
+                    CreatedAt =
+                        DateTime.UtcNow
+                }
+            );
+        }
 
         await _unitOfWork.SaveChangesAsync();
 
@@ -221,6 +241,29 @@ public class OrdersController : ControllerBase
 
                 item.Product.StockQuantity +=
                     item.Quantity;
+
+                await _unitOfWork.StockMovements.AddAsync(
+                    new StockMovement
+                    {
+                        ProductId =
+                            item.ProductId,
+
+                        OrderId =
+                            order.Id,
+
+                        QuantityChange =
+                            item.Quantity,
+
+                        Type =
+                            "OrderCancellation",
+
+                        Reason =
+                            "Annulation de commande",
+
+                        CreatedAt =
+                            DateTime.UtcNow
+                    }
+                );
             }
 
             order.Status = "Cancelled";

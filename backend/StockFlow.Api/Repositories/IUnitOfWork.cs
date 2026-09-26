@@ -12,5 +12,7 @@ public interface IUnitOfWork
 
     ISupplierRepository Suppliers { get; }
 
+    IStockMovementRepository StockMovements { get; }
+
     Task<int> SaveChangesAsync();
 }

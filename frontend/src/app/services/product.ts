@@ -53,6 +53,20 @@ export class ProductService {
     );
   }
 
+  restockProduct(
+    id: number,
+    quantity: number,
+    reason: string
+  ): Observable<Product> {
+    return this.http.post<Product>(
+      `${this.apiUrl}/${id}/restock`,
+      {
+        quantity,
+        reason
+      }
+    );
+  }
+
   deleteProduct(
     id: number
   ): Observable<void> {

@@ -36,6 +36,19 @@ export const routes: Routes = [
   },
 
   {
+    path: 'stock-movements',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import(
+        './pages/stock-movements/stock-movements'
+      )
+        .then(
+          component =>
+            component.StockMovements
+        )
+  },
+
+  {
     path: 'suppliers',
     canActivate: [authGuard],
     loadComponent: () =>

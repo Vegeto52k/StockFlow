@@ -17,7 +17,6 @@ export interface ProductSaveRequest {
   reference: string;
   category: string;
   unitPrice: number;
-  stockQuantity: number;
   minimumStock: number;
   supplierId: number | null;
 }

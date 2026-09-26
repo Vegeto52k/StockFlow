@@ -1,0 +1,137 @@
+<p-toast />
+
+<section class="stock-movements-page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Mouvements de stock</h2>
+
+      <p>
+        Historique des entrées et sorties de stock de StockFlow.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="filters">
+
+    <div class="filter-field">
+
+      <label for="productFilter">
+        Produit
+      </label>
+
+      <p-select
+        inputId="productFilter"
+        [formControl]="productFilter"
+        [options]="products()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Tous les produits"
+        [showClear]="true"
+        [filter]="true"
+        filterBy="name"
+      />
+
+    </div>
+
+  </div>
+
+
+  <p-table
+    [value]="movements()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+  >
+
+    <ng-template #header>
+      <tr>
+        <th>Date</th>
+        <th>Produit</th>
+        <th>Mouvement</th>
+        <th>Origine</th>
+        <th>Commande</th>
+        <th>Motif</th>
+      </tr>
+    </ng-template>
+
+
+    <ng-template
+      #body
+      let-movement
+    >
+      <tr>
+
+        <td>
+          {{
+            movement.createdAt
+              | date:'dd/MM/yyyy HH:mm'
+          }}
+        </td>
+
+        <td>
+          {{ movement.productName }}
+        </td>
+
+        <td>
+
+          @if (isIncoming(movement)) {
+
+            <span class="movement-in">
+              +{{ movement.quantityChange }}
+            </span>
+
+          } @else {
+
+            <span class="movement-out">
+              {{ movement.quantityChange }}
+            </span>
+
+          }
+
+        </td>
+
+        <td>
+          {{ getMovementLabel(movement.type) }}
+        </td>
+
+        <td>
+
+          @if (movement.orderId !== null) {
+
+            #{{ movement.orderId }}
+
+          } @else {
+
+            —
+          }
+
+        </td>
+
+        <td>
+          {{ movement.reason }}
+        </td>
+
+      </tr>
+    </ng-template>
+
+
+    <ng-template #emptymessage>
+      <tr>
+
+        <td
+          colspan="6"
+          class="empty-message"
+        >
+          Aucun mouvement de stock enregistré.
+        </td>
+
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</section>
