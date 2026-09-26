@@ -118,6 +118,16 @@
           <button
             pButton
             type="button"
+            severity="warn"
+            (click)="openAdjustmentDialog(product)"
+            title="Ajuster le stock"
+          >
+            <i class="pi pi-sliders-h"></i>
+          </button>
+
+          <button
+            pButton
+            type="button"
             severity="secondary"
             (click)="openEditDialog(product)"
             title="Modifier"
@@ -434,6 +444,138 @@
         >
           <i class="pi pi-plus-circle"></i>
           <span>Réapprovisionner</span>
+        </button>
+
+      </div>
+
+    </form>
+
+  }
+
+</p-dialog>
+
+
+<p-dialog
+  header="Ajuster le stock"
+  [(visible)]="adjustmentDialogVisible"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+>
+
+  @if (adjustingProduct(); as product) {
+
+    <form
+      [formGroup]="adjustmentForm"
+      (ngSubmit)="adjustStock()"
+    >
+
+      <div class="restock-product-info">
+
+        <strong>
+          {{ product.name }}
+        </strong>
+
+        <span>
+          Stock enregistré :
+          {{ product.stockQuantity }}
+        </span>
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="actualQuantity">
+          Stock réellement compté
+        </label>
+
+        <p-inputnumber
+          inputId="actualQuantity"
+          formControlName="actualQuantity"
+          [min]="0"
+          [showButtons]="true"
+        />
+
+        @if (
+          adjustmentForm.controls.actualQuantity.touched &&
+          adjustmentForm.controls.actualQuantity.invalid
+        ) {
+          <small class="form-error">
+            Le stock réel ne peut pas être négatif.
+          </small>
+        }
+
+      </div>
+
+
+      <div class="adjustment-summary">
+
+        <span>
+          Écart
+        </span>
+
+        @if (calculateAdjustmentDifference() > 0) {
+
+          <strong class="movement-in">
+            +{{ calculateAdjustmentDifference() }}
+          </strong>
+
+        } @else if (
+          calculateAdjustmentDifference() < 0
+        ) {
+
+          <strong class="movement-out">
+            {{ calculateAdjustmentDifference() }}
+          </strong>
+
+        } @else {
+
+          <strong>
+            0
+          </strong>
+
+        }
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="adjustmentReason">
+          Motif
+        </label>
+
+        <input
+          pInputText
+          id="adjustmentReason"
+          formControlName="reason"
+          placeholder="Ex. Inventaire physique septembre"
+        />
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button
+          pButton
+          type="button"
+          severity="secondary"
+          (click)="adjustmentDialogVisible = false"
+        >
+          Annuler
+        </button>
+
+        <button
+          pButton
+          type="submit"
+          severity="warn"
+          [disabled]="
+            calculateAdjustmentDifference() === 0
+          "
+        >
+          <i class="pi pi-check"></i>
+          <span>Valider l'ajustement</span>
         </button>
 
       </div>

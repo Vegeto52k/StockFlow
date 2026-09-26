@@ -46,10 +46,7 @@ export class ProductService {
   ): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/${id}`,
-      {
-        id,
-        ...product
-      }
+      product
     );
   }
 
@@ -62,6 +59,20 @@ export class ProductService {
       `${this.apiUrl}/${id}/restock`,
       {
         quantity,
+        reason
+      }
+    );
+  }
+
+  adjustStock(
+    id: number,
+    actualQuantity: number,
+    reason: string
+  ): Observable<Product> {
+    return this.http.post<Product>(
+      `${this.apiUrl}/${id}/adjust-stock`,
+      {
+        actualQuantity,
         reason
       }
     );

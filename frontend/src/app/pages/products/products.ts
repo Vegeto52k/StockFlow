@@ -78,12 +78,17 @@ export class Products implements OnInit {
 
   restockDialogVisible = false;
 
+  adjustmentDialogVisible = false;
+
   editingProductId: number | null = null;
 
   editingProduct =
     signal<Product | null>(null);
 
   restockingProduct =
+    signal<Product | null>(null);
+
+  adjustingProduct =
     signal<Product | null>(null);
 
   productForm = new FormGroup({
@@ -155,6 +160,27 @@ export class Products implements OnInit {
         validators: [
           Validators.required,
           Validators.min(1)
+        ]
+      }
+    ),
+
+    reason: new FormControl(
+      '',
+      {
+        nonNullable: true
+      }
+    )
+  });
+
+  adjustmentForm = new FormGroup({
+
+    actualQuantity: new FormControl(
+      0,
+      {
+        nonNullable: true,
+        validators: [
+          Validators.required,
+          Validators.min(0)
         ]
       }
     ),
@@ -269,6 +295,24 @@ export class Products implements OnInit {
     this.restockDialogVisible = true;
   }
 
+  openAdjustmentDialog(
+    product: Product
+  ): void {
+
+    this.adjustingProduct.set(
+      product
+    );
+
+    this.adjustmentForm.reset({
+      actualQuantity:
+        product.stockQuantity,
+
+      reason: ''
+    });
+
+    this.adjustmentDialogVisible = true;
+  }
+
   saveProduct(): void {
 
     if (this.productForm.invalid) {
@@ -362,15 +406,8 @@ export class Products implements OnInit {
       .subscribe({
         next: (updatedProduct) => {
 
-          this.products.update(
-            products =>
-              products.map(
-                currentProduct =>
-                  currentProduct.id ===
-                  updatedProduct.id
-                    ? updatedProduct
-                    : currentProduct
-              )
+          this.replaceProduct(
+            updatedProduct
           );
 
           this.restockDialogVisible =
@@ -390,19 +427,91 @@ export class Products implements OnInit {
         },
 
         error: (error) => {
-
-          const detail =
-            typeof error.error === 'string'
-              ? error.error
-              : 'Impossible de réapprovisionner le produit.';
-
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail
-          });
+          this.showStockError(
+            error,
+            'Impossible de réapprovisionner le produit.'
+          );
         }
       });
+  }
+
+  adjustStock(): void {
+
+    if (this.adjustmentForm.invalid) {
+      this.adjustmentForm.markAllAsTouched();
+      return;
+    }
+
+    const product =
+      this.adjustingProduct();
+
+    if (product === null) {
+      return;
+    }
+
+    const formValue =
+      this.adjustmentForm.getRawValue();
+
+    const difference =
+      formValue.actualQuantity -
+      product.stockQuantity;
+
+    this.productService
+      .adjustStock(
+        product.id,
+        formValue.actualQuantity,
+        formValue.reason
+      )
+      .subscribe({
+        next: (updatedProduct) => {
+
+          this.replaceProduct(
+            updatedProduct
+          );
+
+          this.adjustmentDialogVisible =
+            false;
+
+          this.adjustingProduct.set(
+            null
+          );
+
+          const signedDifference =
+            difference > 0
+              ? `+${difference}`
+              : `${difference}`;
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Stock ajusté',
+            detail:
+              `Le stock de "${updatedProduct.name}" a été ajusté de ${signedDifference}.`
+          });
+        },
+
+        error: (error) => {
+          this.showStockError(
+            error,
+            'Impossible d’ajuster le stock.'
+          );
+        }
+      });
+  }
+
+  calculateAdjustmentDifference(): number {
+
+    const product =
+      this.adjustingProduct();
+
+    if (product === null) {
+      return 0;
+    }
+
+    return (
+      this.adjustmentForm.controls
+        .actualQuantity.value -
+      product.stockQuantity
+    );
   }
 
   confirmDelete(
@@ -476,6 +585,39 @@ export class Products implements OnInit {
       product.stockQuantity <=
       product.minimumStock
     );
+  }
+
+  private replaceProduct(
+    updatedProduct: Product
+  ): void {
+
+    this.products.update(
+      products =>
+        products.map(
+          product =>
+            product.id ===
+            updatedProduct.id
+              ? updatedProduct
+              : product
+        )
+    );
+  }
+
+  private showStockError(
+    error: any,
+    fallbackMessage: string
+  ): void {
+
+    const detail =
+      typeof error.error === 'string'
+        ? error.error
+        : fallbackMessage;
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Erreur',
+      detail
+    });
   }
 
   private showSaveError(): void {

@@ -67,8 +67,6 @@ public class ProductsController : ControllerBase
             UnitPrice = request.UnitPrice,
             MinimumStock = request.MinimumStock,
             SupplierId = request.SupplierId,
-
-            // Tout nouveau produit commence à zéro.
             StockQuantity = 0
         };
 
@@ -182,6 +180,80 @@ public class ProductsController : ControllerBase
                     request.Quantity,
 
                 Type = "Restock",
+
+                Reason = reason,
+
+                CreatedAt =
+                    DateTime.UtcNow
+            }
+        );
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var updatedProduct =
+            await _unitOfWork.Products.GetByIdAsync(
+                id
+            );
+
+        if (updatedProduct is null)
+        {
+            return StatusCode(500);
+        }
+
+        return Ok(updatedProduct);
+    }
+
+    [HttpPost("{id:int}/adjust-stock")]
+    public async Task<ActionResult<Product>> AdjustStock(
+        int id,
+        AdjustStockRequest request)
+    {
+        if (request.ActualQuantity < 0)
+        {
+            return BadRequest(
+                "Le stock réel ne peut pas être négatif."
+            );
+        }
+
+        var product =
+            await _unitOfWork.Products
+                .GetByIdForUpdateAsync(id);
+
+        if (product is null)
+        {
+            return NotFound(
+                "Le produit demandé n'existe pas."
+            );
+        }
+
+        var quantityChange =
+            request.ActualQuantity -
+            product.StockQuantity;
+
+        if (quantityChange == 0)
+        {
+            return BadRequest(
+                "Le stock réel est identique au stock enregistré. Aucun ajustement n'est nécessaire."
+            );
+        }
+
+        var reason =
+            string.IsNullOrWhiteSpace(request.Reason)
+                ? "Correction d'inventaire"
+                : request.Reason.Trim();
+
+        product.StockQuantity =
+            request.ActualQuantity;
+
+        await _unitOfWork.StockMovements.AddAsync(
+            new StockMovement
+            {
+                ProductId = product.Id,
+
+                QuantityChange =
+                    quantityChange,
+
+                Type = "Adjustment",
 
                 Reason = reason,
 
