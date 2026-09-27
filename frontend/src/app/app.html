@@ -63,6 +63,19 @@
           <span>Commandes</span>
         </a>
 
+
+        @if (role() === 'Admin') {
+
+          <a
+            routerLink="/users"
+            routerLinkActive="active"
+          >
+            <i class="pi pi-user-edit"></i>
+            <span>Utilisateurs</span>
+          </a>
+
+        }
+
       </nav>
 
     </aside>

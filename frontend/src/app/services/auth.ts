@@ -1,16 +1,20 @@
 import { HttpClient } from '@angular/common/http';
+
 import {
   computed,
   inject,
   Injectable,
   signal
 } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+
+import {
+  Observable,
+  tap
+} from 'rxjs';
 
 import {
   AuthResponse,
-  LoginRequest,
-  RegisterRequest
+  LoginRequest
 } from '../models/auth.model';
 
 @Injectable({
@@ -18,7 +22,8 @@ import {
 })
 export class AuthService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
   private readonly apiUrl =
     'http://localhost:5166/api/auth';
@@ -34,17 +39,23 @@ export class AuthService {
 
   private readonly currentToken =
     signal<string | null>(
-      localStorage.getItem(this.tokenKey)
+      localStorage.getItem(
+        this.tokenKey
+      )
     );
 
   private readonly currentUsername =
     signal<string | null>(
-      localStorage.getItem(this.usernameKey)
+      localStorage.getItem(
+        this.usernameKey
+      )
     );
 
   private readonly currentRole =
     signal<string | null>(
-      localStorage.getItem(this.roleKey)
+      localStorage.getItem(
+        this.roleKey
+      )
     );
 
   username =
@@ -53,9 +64,11 @@ export class AuthService {
   role =
     this.currentRole.asReadonly();
 
-  isAuthenticated = computed(
-    () => this.currentToken() !== null
-  );
+  isAuthenticated =
+    computed(
+      () =>
+        this.currentToken() !== null
+    );
 
   login(
     request: LoginRequest
@@ -68,23 +81,9 @@ export class AuthService {
       )
       .pipe(
         tap(response => {
-          this.saveSession(response);
-        })
-      );
-  }
-
-  register(
-    request: RegisterRequest
-  ): Observable<AuthResponse> {
-
-    return this.http
-      .post<AuthResponse>(
-        `${this.apiUrl}/register`,
-        request
-      )
-      .pipe(
-        tap(response => {
-          this.saveSession(response);
+          this.saveSession(
+            response
+          );
         })
       );
   }

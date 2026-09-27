@@ -1,0 +1,165 @@
+<p-toast />
+
+<p-confirmdialog />
+
+<section class="users-page">
+
+    <div class="page-header">
+
+        <div>
+            <h2>Utilisateurs</h2>
+
+            <p>
+                Gestion des comptes et des droits
+                d'accès à StockFlow.
+            </p>
+        </div>
+
+        <button pButton type="button" (click)="openCreateDialog()">
+            <i class="pi pi-user-plus"></i>
+
+            <span>
+                Nouvel utilisateur
+            </span>
+        </button>
+
+    </div>
+
+
+    <p-table [value]="users()" [paginator]="true" [rows]="10">
+
+        <ng-template #header>
+
+            <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+
+        </ng-template>
+
+
+        <ng-template #body let-user>
+
+            <tr>
+
+                <td>
+
+                    <div class="username-cell">
+
+                        <span>
+                            {{ user.username }}
+                        </span>
+
+                        @if (isCurrentUser(user)) {
+
+                        <small>
+                            Vous
+                        </small>
+
+                        }
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <p-select [options]="roleOptions" optionLabel="label" optionValue="value" [ngModel]="user.role"
+                        (ngModelChange)="changeRole(user, $event)" [ngModelOptions]="{ standalone: true }"
+                        [disabled]="isCurrentUser(user)" />
+
+                </td>
+
+
+                <td>
+
+                    <button pButton type="button" severity="danger" title="Supprimer" [disabled]="isCurrentUser(user)"
+                        (click)="confirmDelete(user)">
+                        <i class="pi pi-trash"></i>
+                    </button>
+
+                </td>
+
+            </tr>
+
+        </ng-template>
+
+
+        <ng-template #emptymessage>
+
+            <tr>
+                <td colspan="3">
+                    Aucun utilisateur.
+                </td>
+            </tr>
+
+        </ng-template>
+
+    </p-table>
+
+</section>
+
+
+<p-dialog header="Nouvel utilisateur" [(visible)]="createDialogVisible" [modal]="true" [style]="{ width: '500px' }">
+
+    <form [formGroup]="createForm" (ngSubmit)="createUser()">
+
+        <div class="form-field">
+
+            <label for="username">
+                Nom d'utilisateur
+            </label>
+
+            <input pInputText id="username" formControlName="username" />
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="password">
+                Mot de passe
+            </label>
+
+            <p-password inputId="password" formControlName="password" [feedback]="true" [toggleMask]="true" />
+
+            <small>
+                Minimum 8 caractères.
+            </small>
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="role">
+                Rôle
+            </label>
+
+            <p-select inputId="role" formControlName="role" [options]="roleOptions" optionLabel="label"
+                optionValue="value" />
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button pButton type="button" severity="secondary" (click)="createDialogVisible = false">
+                Annuler
+            </button>
+
+            <button pButton type="submit">
+                <i class="pi pi-check"></i>
+
+                <span>
+                    Créer
+                </span>
+            </button>
+
+        </div>
+
+    </form>
+
+</p-dialog>

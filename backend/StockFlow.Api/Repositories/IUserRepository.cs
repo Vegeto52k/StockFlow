@@ -4,7 +4,27 @@ namespace StockFlow.Api.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> GetByUsernameAsync(string username);
+    Task<IEnumerable<User>> GetAllAsync();
 
-    Task AddAsync(User user);
+    Task<User?> GetByUsernameAsync(
+        string username
+    );
+
+    Task<User?> GetByUsernameForUpdateAsync(
+        string username
+    );
+
+    Task<User?> GetByIdForUpdateAsync(
+        int id
+    );
+
+    Task<int> CountAdminsAsync();
+
+    Task AddAsync(
+        User user
+    );
+
+    void Delete(
+        User user
+    );
 }

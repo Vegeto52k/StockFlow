@@ -10,7 +10,6 @@ namespace StockFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -30,82 +29,7 @@ public class AuthController : ControllerBase
         _tokenService = tokenService;
     }
 
-    [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register(
-        RegisterRequest request)
-    {
-        var username = request.Username.Trim();
-
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            return BadRequest(
-                "Le nom d'utilisateur est obligatoire."
-            );
-        }
-
-        if (username.Length < 3)
-        {
-            return BadRequest(
-                "Le nom d'utilisateur doit contenir au moins 3 caractères."
-            );
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return BadRequest(
-                "Le mot de passe est obligatoire."
-            );
-        }
-
-        if (request.Password.Length < 8)
-        {
-            return BadRequest(
-                "Le mot de passe doit contenir au moins 8 caractères."
-            );
-        }
-
-        var existingUser =
-            await _unitOfWork.Users.GetByUsernameAsync(
-                username
-            );
-
-        if (existingUser is not null)
-        {
-            return Conflict(
-                "Ce nom d'utilisateur existe déjà."
-            );
-        }
-
-        var user = new User
-        {
-            Username = username,
-            Role = "User"
-        };
-
-        user.PasswordHash =
-            _passwordHasher.HashPassword(
-                user,
-                request.Password
-            );
-
-        await _unitOfWork.Users.AddAsync(user);
-
-        await _unitOfWork.SaveChangesAsync();
-
-        var token =
-            _tokenService.CreateToken(user);
-
-        return StatusCode(
-            StatusCodes.Status201Created,
-            new AuthResponse
-            {
-                Token = token,
-                Username = user.Username,
-                Role = user.Role
-            }
-        );
-    }
-
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(
         LoginRequest request)
