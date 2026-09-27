@@ -277,22 +277,41 @@ public class ProductsController : ControllerBase
         return Ok(updatedProduct);
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteProduct(
-        int id)
+[HttpDelete("{id:int}")]
+public async Task<IActionResult> DeleteProduct(
+    int id)
+{
+    var product =
+        await _unitOfWork.Products.GetByIdAsync(id);
+
+    if (product is null)
     {
-        var product =
-            await _unitOfWork.Products.GetByIdAsync(id);
-
-        if (product is null)
-        {
-            return NotFound();
-        }
-
-        _unitOfWork.Products.Delete(product);
-
-        await _unitOfWork.SaveChangesAsync();
-
-        return NoContent();
+        return NotFound(
+            "Le produit demandé n'existe pas."
+        );
     }
+
+    var hasOrders =
+        await _unitOfWork.Orders
+            .ExistsForProductAsync(id);
+
+    var hasStockMovements =
+        await _unitOfWork.StockMovements
+            .ExistsForProductAsync(id);
+
+    if (hasOrders || hasStockMovements)
+    {
+        return Conflict(
+            "Impossible de supprimer ce produit car il possède déjà un historique de commandes ou de mouvements de stock."
+        );
+    }
+
+    _unitOfWork.Products.Delete(
+        product
+    );
+
+    await _unitOfWork.SaveChangesAsync();
+
+    return NoContent();
+}
 }

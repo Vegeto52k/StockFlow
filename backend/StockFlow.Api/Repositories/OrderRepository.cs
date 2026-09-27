@@ -8,42 +8,78 @@ public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext _context;
 
-    public OrderRepository(AppDbContext context)
+    public OrderRepository(
+        AppDbContext context
+    )
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<Order>> GetAllAsync()
+    public async Task<IEnumerable<Order>>
+        GetAllAsync()
     {
         return await _context.Orders
             .AsNoTracking()
             .Include(order => order.Client)
             .Include(order => order.Items)
                 .ThenInclude(item => item.Product)
+            .OrderByDescending(
+                order => order.CreatedAt
+            )
             .ToListAsync();
     }
 
-    public async Task<Order?> GetByIdAsync(int id)
+    public async Task<Order?>
+        GetByIdAsync(
+            int id
+        )
     {
         return await _context.Orders
             .AsNoTracking()
             .Include(order => order.Client)
             .Include(order => order.Items)
                 .ThenInclude(item => item.Product)
-            .FirstOrDefaultAsync(order => order.Id == id);
+            .FirstOrDefaultAsync(
+                order => order.Id == id
+            );
     }
 
-    public async Task<Order?> GetByIdForUpdateAsync(int id)
+    public async Task<Order?>
+        GetByIdForUpdateAsync(
+            int id
+        )
     {
         return await _context.Orders
             .Include(order => order.Client)
             .Include(order => order.Items)
                 .ThenInclude(item => item.Product)
-            .FirstOrDefaultAsync(order => order.Id == id);
+            .FirstOrDefaultAsync(
+                order => order.Id == id
+            );
     }
 
-    public async Task AddAsync(Order order)
+    public async Task<bool>
+        ExistsForProductAsync(
+            int productId
+        )
     {
-        await _context.Orders.AddAsync(order);
+        return await _context.Orders
+            .AnyAsync(
+                order =>
+                    order.Items.Any(
+                        item =>
+                            item.ProductId ==
+                            productId
+                    )
+            );
+    }
+
+    public async Task AddAsync(
+        Order order
+    )
+    {
+        await _context.Orders.AddAsync(
+            order
+        );
     }
 }

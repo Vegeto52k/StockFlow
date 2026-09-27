@@ -10,5 +10,7 @@ public interface IOrderRepository
 
     Task<Order?> GetByIdForUpdateAsync(int id);
 
+    Task<bool> ExistsForProductAsync(int productId);
+
     Task AddAsync(Order order);
 }

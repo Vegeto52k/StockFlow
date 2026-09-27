@@ -10,7 +10,8 @@ public class StockMovementRepository
     private readonly AppDbContext _context;
 
     public StockMovementRepository(
-        AppDbContext context)
+        AppDbContext context
+    )
     {
         _context = context;
     }
@@ -29,7 +30,8 @@ public class StockMovementRepository
 
     public async Task<IEnumerable<StockMovement>>
         GetByProductIdAsync(
-            int productId)
+            int productId
+        )
     {
         return await _context.StockMovements
             .AsNoTracking()
@@ -44,10 +46,24 @@ public class StockMovementRepository
             .ToListAsync();
     }
 
-    public async Task AddAsync(
-        StockMovement movement)
+    public async Task<bool>
+        ExistsForProductAsync(
+            int productId
+        )
     {
-        await _context.StockMovements
-            .AddAsync(movement);
+        return await _context.StockMovements
+            .AnyAsync(
+                movement =>
+                    movement.ProductId == productId
+            );
+    }
+
+    public async Task AddAsync(
+        StockMovement movement
+    )
+    {
+        await _context.StockMovements.AddAsync(
+            movement
+        );
     }
 }

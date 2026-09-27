@@ -540,42 +540,47 @@ export class Products implements OnInit {
     });
   }
 
-  private deleteProduct(
-    product: Product
-  ): void {
+private deleteProduct(
+  product: Product
+): void {
 
-    this.productService
-      .deleteProduct(product.id)
-      .subscribe({
-        next: () => {
+  this.productService
+    .deleteProduct(product.id)
+    .subscribe({
+      next: () => {
 
-          this.products.update(
-            products =>
-              products.filter(
-                currentProduct =>
-                  currentProduct.id !==
-                  product.id
-              )
-          );
+        this.products.update(
+          products =>
+            products.filter(
+              currentProduct =>
+                currentProduct.id !==
+                product.id
+            )
+        );
 
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Produit supprimé',
-            detail:
-              'Le produit a été supprimé.'
-          });
-        },
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Produit supprimé',
+          detail:
+            'Le produit a été supprimé.'
+        });
+      },
 
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail:
-              'Impossible de supprimer le produit.'
-          });
-        }
-      });
-  }
+      error: (error) => {
+
+        const detail =
+          typeof error.error === 'string'
+            ? error.error
+            : 'Impossible de supprimer le produit.';
+
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Suppression impossible',
+          detail
+        });
+      }
+    });
+}
 
   isLowStock(
     product: Product

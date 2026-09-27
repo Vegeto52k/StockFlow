@@ -10,5 +10,11 @@ public interface IStockMovementRepository
         int productId
     );
 
-    Task AddAsync(StockMovement movement);
+    Task<bool> ExistsForProductAsync(
+        int productId
+    );
+
+    Task AddAsync(
+        StockMovement movement
+    );
 }
