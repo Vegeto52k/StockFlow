@@ -17,6 +17,8 @@ import {
   LoginRequest
 } from '../models/auth.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +28,7 @@ export class AuthService {
     inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5166/api/auth';
+    `${environment.apiUrl}/auth`;
 
   private readonly tokenKey =
     'stockflow_token';

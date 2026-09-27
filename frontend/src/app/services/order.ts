@@ -7,20 +7,28 @@ import {
   Order
 } from '../models/order.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:5166/api/orders';
+  private readonly apiUrl =
+    `${environment.apiUrl}/orders`;
 
   getOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(this.apiUrl);
+    return this.http.get<Order[]>(
+      this.apiUrl
+    );
   }
 
-  getOrderById(id: number): Observable<Order> {
+  getOrderById(
+    id: number
+  ): Observable<Order> {
     return this.http.get<Order>(
       `${this.apiUrl}/${id}`
     );

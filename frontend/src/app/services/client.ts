@@ -3,21 +3,28 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Client } from '../models/client.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClientService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:5166/api/clients';
+  private readonly apiUrl =
+    `${environment.apiUrl}/clients`;
 
   getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>(this.apiUrl);
+    return this.http.get<Client[]>(
+      this.apiUrl
+    );
   }
 
-  createClient(client: Omit<Client, 'id'>): Observable<Client> {
+  createClient(
+    client: Omit<Client, 'id'>
+  ): Observable<Client> {
     return this.http.post<Client>(
       this.apiUrl,
       client
@@ -34,7 +41,9 @@ export class ClientService {
     );
   }
 
-  deleteClient(id: number): Observable<void> {
+  deleteClient(
+    id: number
+  ): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`
     );

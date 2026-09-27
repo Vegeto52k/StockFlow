@@ -6,6 +6,8 @@ import {
   StockMovement
 } from '../models/stock-movement.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +17,7 @@ export class StockMovementService {
     inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5166/api/stockmovements';
+    `${environment.apiUrl}/stockmovements`;
 
   getStockMovements():
     Observable<StockMovement[]> {

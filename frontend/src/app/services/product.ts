@@ -7,15 +7,18 @@ import {
   ProductSaveRequest
 } from '../models/product.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5166/api/products';
+    `${environment.apiUrl}/products`;
 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(

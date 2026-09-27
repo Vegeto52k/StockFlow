@@ -3,16 +3,18 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Supplier } from '../models/supplier.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SupplierService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5166/api/suppliers';
+    `${environment.apiUrl}/suppliers`;
 
   getSuppliers(): Observable<Supplier[]> {
     return this.http.get<Supplier[]>(

@@ -8,6 +8,8 @@ import {
   User
 } from '../models/user.model';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -17,7 +19,7 @@ export class UserService {
     inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:5166/api/users';
+    `${environment.apiUrl}/users`;
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(
