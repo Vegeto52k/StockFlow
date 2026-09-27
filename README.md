@@ -364,11 +364,9 @@ Cette organisation permet de modifier l’adresse du backend sans avoir à modif
 ### 1. Cloner le repository
 
 ```bash
-git clone https://github.com/tonpseudo/StockFlow.git
+git clone https://github.com/Vegeto52k/StockFlow.git
 cd StockFlow
 ```
-
-> L’URL sera à remplacer par celle du repository GitHub définitif.
 
 ### 2. Préparer le backend
 
@@ -384,18 +382,32 @@ Restaurer les dépendances :
 dotnet restore
 ```
 
-Configurer la clé JWT de développement :
+Initialiser les User Secrets :
 
 ```bash
 dotnet user-secrets init
+```
+
+Configurer la clé JWT :
+
+```bash
 dotnet user-secrets set "Jwt:Key" "VotreCleDeDeveloppementSuffisammentLongue"
 ```
 
-Appliquer les migrations Entity Framework Core :
+Configurer le premier compte administrateur :
 
 ```bash
-dotnet ef database update
+dotnet user-secrets set "InitialAdmin:Username" "admin"
+dotnet user-secrets set "InitialAdmin:Password" "VotreMotDePasseSecurise"
 ```
+
+Au premier démarrage sur une base de données vide, StockFlow :
+
+- applique automatiquement les migrations Entity Framework Core
+- vérifie si un administrateur existe déjà
+- crée le premier compte administrateur si nécessaire
+
+Les identifiants de l’administrateur initial ainsi que la clé JWT sont stockés avec **.NET User Secrets** et ne sont pas versionnés dans Git.
 
 Démarrer l’API :
 
