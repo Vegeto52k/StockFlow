@@ -68,6 +68,10 @@ builder.Services.AddScoped<
     TokenService
 >();
 
+builder.Services.AddScoped<
+    DatabaseInitializer
+>();
+
 var jwtKey =
     builder.Configuration["Jwt:Key"];
 
@@ -140,6 +144,20 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var databaseInitializer =
+        scope.ServiceProvider
+            .GetRequiredService<
+                DatabaseInitializer
+            >();
+
+    await databaseInitializer
+        .InitializeAsync();
+}
+
 
 if (app.Environment.IsDevelopment())
 {
