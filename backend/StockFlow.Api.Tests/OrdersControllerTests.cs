@@ -389,10 +389,9 @@ public class OrdersControllerTests
 
         var orderMovement =
             Assert.Single(
-                movements.Where(
-                    movement =>
-                        movement.Type == "Order"
-                )
+                movements,
+                movement =>
+                    movement.Type == "Order"
             );
 
         Assert.Equal(
@@ -407,11 +406,10 @@ public class OrdersControllerTests
 
         var cancellationMovement =
             Assert.Single(
-                movements.Where(
-                    movement =>
-                        movement.Type ==
-                        "OrderCancellation"
-                )
+                movements,
+                movement =>
+                    movement.Type ==
+                    "OrderCancellation"
             );
 
         Assert.Equal(
